@@ -2321,7 +2321,6 @@ static SEXP applyClosure_core(SEXP call, SEXP op, SEXP arglist, SEXP rho,
     return val;
 }
 
-attribute_hidden
 SEXP applyClosure(SEXP call, SEXP op, SEXP arglist, SEXP rho,
 		  SEXP suppliedvars, Rboolean unpromise)
 {
@@ -2637,7 +2636,7 @@ static SEXP replaceCall(SEXP fun, SEXP val, SEXP args, SEXP rhs)
 }
 
 
-static R_INLINE Rboolean asLogicalNoNA(SEXP s, SEXP call)
+Rboolean asLogicalNoNA(SEXP s, SEXP call)
 {
     int cond = NA_LOGICAL; // cannot be Rboolean
 
@@ -5764,7 +5763,7 @@ static R_INLINE SEXP GET_BINDING_CELL_CACHE(SEXP symbol, SEXP rho,
     }
 }
 
-NORET static void UNBOUND_VARIABLE_ERROR(SEXP symbol, SEXP rho)
+NORET void UNBOUND_VARIABLE_ERROR(SEXP symbol, SEXP rho)
 {
     errorcall_cpy(getLexicalCall(rho),
 		  _("object '%s' not found"),
@@ -6806,7 +6805,7 @@ static void signalMissingArgError(SEXP args, SEXP call)
 	}
 }
 
-static R_INLINE void checkForMissings(SEXP args, SEXP call)
+void checkForMissings(SEXP args, SEXP call)
 {
     Rboolean found = FALSE;
     for (SEXP a = args; a != R_NilValue; a = CDR(a))
@@ -7141,7 +7140,7 @@ attribute_hidden SEXP R_getBCInterpreterExpression(void)
     return exp;
 }
 
-static SEXP markSpecialArgs(SEXP args)
+SEXP markSpecialArgs(SEXP args)
 {
     SEXP arg;
     for(arg = args; arg != R_NilValue; arg = CDR(arg))

@@ -1,3 +1,8 @@
+/bin/
+/include/
+/lib/
+/library/
+/modules/
 Makeconf
 Makedeps
 Makefile
@@ -7,7 +12,6 @@ Makefrag.cxx
 Makefrag.m
 SVN-REVISION
 SVN-REVISION-tmp
-bin/
 config.log
 config.status
 doc/FAQ
@@ -26,15 +30,19 @@ doc/manual/version.texi
 etc/Renviron
 etc/javaconf
 etc/ldpaths
-include/
-lib/
-library/
 libtool
-modules
 src/**/*.a
 src/**/*.d
 src/**/*.o
 src/**/*.so
+src/include/**/*.ts
+src/include/**/*.tsa
+src/include/Rconfig.h
+src/include/Rmath.h
+src/include/Rmath.h0
+src/include/Rversion.h
+src/include/config.h
+src/library/
 src/main/R.bin
 src/scripts/R.fe
 src/scripts/R.sh
@@ -44,4 +52,6 @@ src/scripts/mkinstalldirs
 src/scripts/pager
 src/scripts/rtags
 src/unix/Rscript
+stamp-R
+stamp-h
 stamp-java
