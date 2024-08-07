@@ -1046,7 +1046,7 @@ static char *Spec_name[] = {
 
 
 /* also used in eval.c */
-attribute_hidden SEXP R_Primitive(const char *primname)
+SEXP R_Primitive(const char *primname)
 {
     for (int i = 0; R_FunTab[i].name; i++)
 	if (strcmp(primname, R_FunTab[i].name) == 0) { /* all names are ASCII */
