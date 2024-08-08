@@ -3059,7 +3059,7 @@ static Rboolean checkTailPosition(SEXP call, SEXP code, SEXP rho)
     else return FALSE;
 }
 
-static void MISSING_ARGUMENT_ERROR(SEXP symbol, SEXP rho);
+void MISSING_ARGUMENT_ERROR(SEXP symbol, SEXP rho);
 attribute_hidden SEXP do_tailcall(SEXP call, SEXP op, SEXP args, SEXP rho)
 {
 #ifdef SUPPORT_TAILCALL
@@ -8727,7 +8727,7 @@ static void bcEval_init(void) {
     bcEval_loop(NULL);
 }
 
-attribute_hidden SEXP R_bcEncode(SEXP bytes)
+SEXP R_bcEncode(SEXP bytes)
 {
     SEXP code;
     BCODE *pc;

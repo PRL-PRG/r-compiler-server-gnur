@@ -1445,7 +1445,6 @@ SEXP ddfind(int i, SEXP rho)
     return R_NilValue;
 }
 
-attribute_hidden
 SEXP ddfindVar(SEXP symbol, SEXP rho)
 {
     int i = ddVal(symbol);
@@ -2337,7 +2336,6 @@ static SEXP findRootPromise(SEXP p) {
 }
 
 // missing() for the case of promise aka *un*evaluated symbol:
-attribute_hidden
 Rboolean R_isMissing(SEXP symbol, SEXP rho)
 {
     int ddv=0;
