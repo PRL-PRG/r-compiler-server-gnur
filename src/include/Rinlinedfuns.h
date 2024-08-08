@@ -320,7 +320,7 @@ INLINE_FUN R_xlen_t XTRUELENGTH(SEXP x)
 # define CHECK_VECTOR_RAW_ELT(x, i) do { } while(0)
 #endif
 
-HIDDEN INLINE_FUN int *LOGICAL0(SEXP x) {
+INLINE_FUN int *LOGICAL0(SEXP x) {
     CHECK_STDVEC_LGL(x);
     return (int *) STDVEC_DATAPTR(x);
 }
