@@ -679,7 +679,8 @@ Rboolean (Rf_isObject)(SEXP s);
 #else
 int (MAYBE_SHARED)(SEXP x);
 int (NO_REFERENCES)(SEXP x);
-#endif
+#endif /* USE_RINTERNALS */
+
 #define MAYBE_REFERENCED(x) (! NO_REFERENCES(x))
 #define NOT_SHARED(x) (! MAYBE_SHARED(x))
 
@@ -1922,7 +1923,7 @@ SEXP ddfindVar(SEXP, SEXP);
 
 /* Defining NO_RINLINEDFUNS disables use to simulate platforms where
    this is not available */
-#if !defined(__MAIN__) && (defined(COMPILING_R) || ( __GNUC__ && !defined(__INTEL_COMPILER) )) && (defined(COMPILING_R) || !defined(NO_RINLINEDFUNS))
+#if defined(RSH) || (defined(CALLED_FROM_DEFN_H) && !defined(__MAIN__) && (defined(COMPILING_R) || ( __GNUC__ && !defined(__INTEL_COMPILER) )) && (defined(COMPILING_R) || !defined(NO_RINLINEDFUNS)))
 #include "Rinlinedfuns.h"
 #else
 /* need remapped names here for use with R_NO_REMAP */
