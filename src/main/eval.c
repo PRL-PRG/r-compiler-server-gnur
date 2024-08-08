@@ -8705,7 +8705,7 @@ static void bcEval_init(void) {
     bcEval_loop(NULL);
 }
 
-attribute_hidden SEXP R_bcEncode(SEXP bytes)
+SEXP R_bcEncode(SEXP bytes)
 {
     SEXP code;
     BCODE *pc;
