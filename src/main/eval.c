@@ -4348,7 +4348,6 @@ static Rboolean R_chooseOpsMethod(SEXP x, SEXP y, SEXP mx, SEXP my,
     return ans == R_NilValue ? FALSE : asLogical(ans);
 }
 
-attribute_hidden
 int DispatchGroup(const char* group, SEXP call, SEXP op, SEXP args, SEXP rho,
 		  SEXP *ans)
 {

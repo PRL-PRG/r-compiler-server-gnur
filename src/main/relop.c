@@ -196,7 +196,7 @@ static SEXP compute_language_relop(SEXP call, SEXP op, SEXP x, SEXP y)
 }
 
 // also called from cmp_relop() in eval.c :
-attribute_hidden SEXP do_relop_dflt(SEXP call, SEXP op, SEXP x, SEXP y)
+SEXP do_relop_dflt(SEXP call, SEXP op, SEXP x, SEXP y)
 {
     /* handle the REALSXP/INTSXP simple scalar case quickly */
     if (IS_SIMPLE_SCALAR(x, INTSXP)) {

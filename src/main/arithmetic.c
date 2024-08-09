@@ -518,7 +518,7 @@ attribute_hidden SEXP do_arith(SEXP call, SEXP op, SEXP args, SEXP env)
     } \
 } while (0)
 
-attribute_hidden SEXP R_binary(SEXP call, SEXP op, SEXP x, SEXP y)
+SEXP R_binary(SEXP call, SEXP op, SEXP x, SEXP y)
 {
     Rboolean xattr, yattr, xarray, yarray, xts, yts, xS4, yS4;
     PROTECT_INDEX xpi, ypi;
