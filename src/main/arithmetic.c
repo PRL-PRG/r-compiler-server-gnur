@@ -1234,7 +1234,7 @@ static SEXP math1(SEXP sa, double(*f)(double), SEXP lcall)
 }
 
 
-attribute_hidden SEXP do_math1(SEXP call, SEXP op, SEXP args, SEXP env)
+SEXP do_math1(SEXP call, SEXP op, SEXP args, SEXP env)
 {
     SEXP s;
 
