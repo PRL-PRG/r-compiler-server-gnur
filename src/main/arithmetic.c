@@ -704,7 +704,7 @@ SEXP R_binary(SEXP call, SEXP op, SEXP x, SEXP y)
     return val;
 }
 
-attribute_hidden SEXP R_unary(SEXP call, SEXP op, SEXP s1)
+SEXP R_unary(SEXP call, SEXP op, SEXP s1)
 {
     ARITHOP_TYPE operation = (ARITHOP_TYPE) PRIMVAL(op);
     switch (TYPEOF(s1)) {
