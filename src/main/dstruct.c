@@ -75,7 +75,7 @@ attribute_hidden SEXP mkPRIMSXP(int offset, int eval)
 /*  mkCLOSXP - return a closure with formals f,  */
 /*             body b, and environment rho       */
 
-attribute_hidden SEXP mkCLOSXP(SEXP formals, SEXP body, SEXP rho)
+SEXP mkCLOSXP(SEXP formals, SEXP body, SEXP rho)
 {
     SEXP c;
     PROTECT(formals);

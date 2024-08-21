@@ -1210,7 +1210,6 @@ void R_RestoreHashCount(SEXP rho);
 #define mbcsToUcs2 Rf_mbcsToUcs2
 #define memtrace_report Rf_memtrace_report
 #define mkCharWUTF8 Rf_mkCharWUTF8
-#define mkCLOSXP Rf_mkCLOSXP
 #define mkFalse Rf_mkFalse
 #define mkPROMISE Rf_mkPROMISE
 #define mkQUOTE Rf_mkQUOTE
@@ -1471,7 +1470,6 @@ SEXP matchArgs_RC(SEXP, SEXP, SEXP);
 SEXP matchPar(const char *, SEXP *);
 void memtrace_report(void *, void *);
 SEXP mkCharWUTF8(const wchar_t *);
-SEXP mkCLOSXP(SEXP, SEXP, SEXP);
 SEXP mkFalse(void);
 SEXP mkPROMISE(SEXP, SEXP);
 SEXP R_mkEVPROMISE(SEXP, SEXP);
