@@ -1925,6 +1925,8 @@ SEXP R_bcEncode(SEXP);
 	DECREMENT_REFCNT(dl__x__);		\
     } while (0)
 
+#undef isNull
+#define isNull(s)	(TYPEOF(s) == NILSXP)
 #undef isObject
 #define isObject(s)	(OBJECT(s) != 0)
 
