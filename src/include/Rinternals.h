@@ -1910,6 +1910,8 @@ SEXP Rf_applyClosure(SEXP, SEXP, SEXP, SEXP, SEXP, Rboolean);
 
 SEXP ddfindVar(SEXP, SEXP);
 
+SEXP R_bcEncode(SEXP);
+
 #define INCREMENT_LINKS(x) do {			\
 	SEXP il__x__ = (x);			\
 	INCREMENT_NAMED(il__x__);		\
