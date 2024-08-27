@@ -951,7 +951,7 @@ static R_INLINE void POP_PENDING_PROMISE(RPRSTACK *cellptr)
     R_PendingPromises = cellptr->next;
 }
 
-static void forcePromise(SEXP e)
+void forcePromise(SEXP e)
 {
     if (! PROMISE_IS_EVALUATED(e)) {
 	PROTECT(e);
