@@ -71,3 +71,5 @@ compile_commands.json
 /tests/ex.gz
 /tests/no-segfault.R
 /tests/p-r-random-tests_seed
+.RData
+.Rhistory
