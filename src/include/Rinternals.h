@@ -1952,6 +1952,21 @@ void SET_SCALAR_CVAL(SEXP x, Rcomplex v);
 void SET_SCALAR_BVAL(SEXP x, Rbyte v);
 #endif
 
+#ifdef IMMEDIATE_PROMISE_VALUES
+# define PRVALUE0(x) ((x)->u.promsxp.value)
+# define PRVALUE(x) \
+    (PROMISE_TAG(x) ? R_expand_promise_value(x) : PRVALUE0(x))
+# define PROMISE_IS_EVALUATED(x) \
+    (PROMISE_TAG(x) || PRVALUE0(x) != R_UnboundValue)
+# define PROMISE_TAG(x)  BNDCELL_TAG(x)
+# define SET_PROMISE_TAG(x, v) SET_BNDCELL_TAG(x, v)
+#else
+# define PRVALUE0(x) ((x)->u.promsxp.value)
+# define PRVALUE(x) PRVALUE0(x)
+# define PROMISE_IS_EVALUATED(x) (PRVALUE(x) != R_UnboundValue)
+# define PROMISE_TAG(x) 0
+#endif
+
 // ====================================================================
 // END RSH CHANGES
 // ====================================================================

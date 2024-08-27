@@ -564,20 +564,6 @@ extern int putenv(char *string);
 #define PRENV(x)	((x)->u.promsxp.env)
 #define PRSEEN(x)	((x)->sxpinfo.gp)
 #define SET_PRSEEN(x,v)	(((x)->sxpinfo.gp)=(v))
-#ifdef IMMEDIATE_PROMISE_VALUES
-# define PRVALUE0(x) ((x)->u.promsxp.value)
-# define PRVALUE(x) \
-    (PROMISE_TAG(x) ? R_expand_promise_value(x) : PRVALUE0(x))
-# define PROMISE_IS_EVALUATED(x) \
-    (PROMISE_TAG(x) || PRVALUE0(x) != R_UnboundValue)
-# define PROMISE_TAG(x)  BNDCELL_TAG(x)
-# define SET_PROMISE_TAG(x, v) SET_BNDCELL_TAG(x, v)
-#else
-# define PRVALUE0(x) ((x)->u.promsxp.value)
-# define PRVALUE(x) PRVALUE0(x)
-# define PROMISE_IS_EVALUATED(x) (PRVALUE(x) != R_UnboundValue)
-# define PROMISE_TAG(x) 0
-#endif
 
 /* Hashing Macros */
 #define HASHASH(x)      ((x)->sxpinfo.gp & HASHASH_MASK)
