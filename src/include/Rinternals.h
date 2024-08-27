@@ -1912,8 +1912,6 @@ SEXP Rf_applyClosure(SEXP, SEXP, SEXP, SEXP, SEXP, Rboolean);
 SEXP ddfindVar(SEXP, SEXP);
 SEXP mkCLOSXP(SEXP, SEXP, SEXP);
 
-SEXP R_bcEncode(SEXP);
-
 #define INCREMENT_LINKS(x) do {			\
 	SEXP il__x__ = (x);			\
 	INCREMENT_NAMED(il__x__);		\
@@ -1925,10 +1923,10 @@ SEXP R_bcEncode(SEXP);
 	DECREMENT_REFCNT(dl__x__);		\
     } while (0)
 
-#undef isNull
-#define isNull(s)	(TYPEOF(s) == NILSXP)
-#undef isObject
-#define isObject(s)	(OBJECT(s) != 0)
+// #undef isNull
+// #define isNull(s)	(TYPEOF(s) == NILSXP)
+// #undef isObject
+// #define isObject(s)	(OBJECT(s) != 0)
 
 /* Defining NO_RINLINEDFUNS disables use to simulate platforms where
    this is not available */

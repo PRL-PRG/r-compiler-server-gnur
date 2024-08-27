@@ -207,6 +207,8 @@ void (SET_HASHVALUE)(SEXP x, int v);
 #define BCODE_EXPR(x)	TAG(x)
 #define isByteCode(x)	(TYPEOF(x)==BCODESXP)
 
+SEXP R_bcEncode(SEXP);
+
 /* constructors for internal ALTREP classes */
 SEXP R_compact_intrange(R_xlen_t n1, R_xlen_t n2);
 SEXP R_deferred_coerceToString(SEXP v, SEXP info);
