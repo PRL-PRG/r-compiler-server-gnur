@@ -32,7 +32,7 @@
 #include <errno.h>
 #include <math.h>
 
-static SEXP bcEval(SEXP, SEXP);
+SEXP bcEval(SEXP, SEXP);
 static void bcEval_init(void);
 
 /* BC_PROFILING needs to be enabled at build time. It is not enabled
@@ -7503,7 +7503,7 @@ static R_INLINE void finish_force_promise(void)
 
 static SEXP bcEval_loop(struct bcEval_locals *);
 
-static SEXP bcEval(SEXP body, SEXP rho)
+SEXP bcEval(SEXP body, SEXP rho)
 {
   /* check version and allow bytecode to be disabled for testing */
   if (R_disable_bytecode || ! R_BCVersionOK(body))
