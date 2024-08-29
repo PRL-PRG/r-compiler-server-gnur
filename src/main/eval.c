@@ -5797,6 +5797,7 @@ NORET void UNBOUND_VARIABLE_ERROR(SEXP symbol, SEXP rho)
 static R_INLINE SEXP FIND_VAR_NO_CACHE(SEXP symbol, SEXP rho, SEXP cell)
 {
     R_varloc_t loc =  R_findVarLoc(symbol, rho);
+    // XXX: does this make sense?
     if (loc.cell && IS_ACTIVE_BINDING(loc.cell)) {
 	SEXP value = R_GetVarLocValue(loc);
 	return value;

@@ -1287,6 +1287,7 @@ static SEXP findVarLoc(SEXP symbol, SEXP rho)
 #endif
 }
 
+// XXX: what is the difference with R_findVarLocInFrame?
 R_varloc_t R_findVarLoc(SEXP rho, SEXP symbol)
 {
     SEXP binding = findVarLoc(rho, symbol);
