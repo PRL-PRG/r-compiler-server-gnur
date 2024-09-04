@@ -552,7 +552,7 @@ extern int putenv(char *string);
 
 /* Primitive Access Macros */
 #define PRIMOFFSET(x)	((x)->u.primsxp.offset)
-#define SET_PRIMOFFSET(x,v)	(((x)->u.primsxp.offset)=(v))
+// #define SET_PRIMOFFSET(x,v)	(((x)->u.primsxp.offset)=(v))
 #define PRIMNAME(x)	(R_FunTab[(x)->u.primsxp.offset].name)
 #define PRIMVAL(x)	(R_FunTab[(x)->u.primsxp.offset].code)
 #define PRIMARITY(x)	(R_FunTab[(x)->u.primsxp.offset].arity)
