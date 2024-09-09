@@ -6061,7 +6061,7 @@ static R_INLINE SEXP CLOSURE_CALL_FRAME_ARGS(void)
 	    SET_TAG(__cell__, t);			\
     } while (0)
 
-int tryDispatch(char *generic, SEXP call, SEXP x, SEXP rho, SEXP *pv)
+int tryDispatch(const char *generic, SEXP call, SEXP x, SEXP rho, SEXP *pv)
 {
   RCNTXT cntxt;
   SEXP pargs, rho1;
