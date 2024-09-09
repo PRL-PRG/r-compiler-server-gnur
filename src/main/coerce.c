@@ -1330,7 +1330,7 @@ SEXP coerceVector(SEXP v, SEXPTYPE type)
 #undef COERCE_ERROR
 
 
-attribute_hidden SEXP CreateTag(SEXP x)
+SEXP CreateTag(SEXP x)
 {
     if (isNull(x) || isSymbol(x))
 	return x;
