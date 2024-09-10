@@ -952,7 +952,7 @@ attribute_hidden SEXP do_subset2(SEXP call, SEXP op, SEXP args, SEXP rho)
     return do_subset2_dflt(call, op, ans, rho);
 }
 
-attribute_hidden SEXP do_subset2_dflt(SEXP call, SEXP op, SEXP args, SEXP rho)
+SEXP do_subset2_dflt(SEXP call, SEXP op, SEXP args, SEXP rho)
 {
     SEXP ans, dims, dimnames, indx, subs, x;
     int i, ndims, nsubs;
