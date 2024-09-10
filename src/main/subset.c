@@ -722,7 +722,7 @@ static R_INLINE R_xlen_t scalarIndex(SEXP s)
 }
 
 // called from (R `[` => ) do_subset, but also from R .subset() :
-attribute_hidden SEXP do_subset_dflt(SEXP call, SEXP op, SEXP args, SEXP rho)
+SEXP do_subset_dflt(SEXP call, SEXP op, SEXP args, SEXP rho)
 {
     /* By default we drop extents of length 1 */
 
