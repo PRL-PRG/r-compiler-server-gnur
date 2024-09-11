@@ -2579,7 +2579,7 @@ SEXP R_execMethod(SEXP op, SEXP rho)
     return val;
 }
 
-static SEXP EnsureLocal(SEXP symbol, SEXP rho, R_varloc_t *ploc)
+SEXP EnsureLocal(SEXP symbol, SEXP rho, R_varloc_t *ploc)
 {
     SEXP vl;
 
