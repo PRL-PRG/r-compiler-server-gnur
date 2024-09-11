@@ -1602,7 +1602,7 @@ NORET static void errorMissingSubscript(SEXP x)
     UNPROTECT(1); /* cond; not reached */
 }
 
-attribute_hidden SEXP do_subassign_dflt(SEXP call, SEXP op, SEXP args, SEXP rho)
+SEXP do_subassign_dflt(SEXP call, SEXP op, SEXP args, SEXP rho)
 {
     SEXP subs, x, y;
     int nsubs, oldtype;
