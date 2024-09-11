@@ -1761,7 +1761,7 @@ NORET static void errorOutOfBoundsSEXP(SEXP x, int subscript, SEXP sindex)
     UNPROTECT(1); /* cond; not reached */
 }
 
-attribute_hidden SEXP
+SEXP
 do_subassign2_dflt(SEXP call, SEXP op, SEXP args, SEXP rho)
 {
     SEXP dims, indx, names, newname, subs, x, xtop, xup, y, thesub = R_NilValue, xOrig = R_NilValue;
