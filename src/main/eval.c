@@ -6078,7 +6078,7 @@ int tryDispatch(const char *generic, SEXP call, SEXP x, SEXP rho, SEXP *pv)
   return dispatched;
 }
 
-int tryAssignDispatch(char *generic, SEXP call, SEXP lhs, SEXP rhs,
+int tryAssignDispatch(const char *generic, SEXP call, SEXP lhs, SEXP rhs,
 			     SEXP rho, SEXP *pv)
 {
     int result;
