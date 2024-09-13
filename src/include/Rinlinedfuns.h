@@ -1124,7 +1124,7 @@ stringPositionTr(SEXP string, const char *translatedElement) {
 }
 
 /* duplicate RHS value of complex assignment if necessary to prevent cycles */
-HIDDEN INLINE_FUN SEXP R_FixupRHS(SEXP x, SEXP y)
+INLINE_FUN SEXP R_FixupRHS(SEXP x, SEXP y)
 {
     if( y != R_NilValue && MAYBE_REFERENCED(y) ) {
 	if (R_cycle_detected(x, y)) {
