@@ -350,7 +350,7 @@ HIDDEN INLINE_FUN void SET_SCALAR_IVAL(SEXP x, int v) {
     CHECK_STDVEC_REAL(x);
     return (double *) STDVEC_DATAPTR(x);
 }
-HIDDEN INLINE_FUN double SCALAR_DVAL(SEXP x) {
+INLINE_FUN double SCALAR_DVAL(SEXP x) {
     CHECK_SCALAR_REAL(x);
     return REAL0(x)[0];
 }
