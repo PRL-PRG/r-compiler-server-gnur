@@ -349,7 +349,7 @@ HIDDEN INLINE_FUN void SET_SCALAR_LVAL(SEXP x, int v) {
     CHECK_STDVEC_INT(x);
     return (int *) STDVEC_DATAPTR(x);
 }
-HIDDEN INLINE_FUN int SCALAR_IVAL(SEXP x) {
+INLINE_FUN int SCALAR_IVAL(SEXP x) {
     CHECK_SCALAR_INT(x);
     return INTEGER(x)[0];
 }
