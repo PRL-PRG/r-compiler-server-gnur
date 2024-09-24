@@ -73,3 +73,4 @@ compile_commands.json
 /tests/p-r-random-tests_seed
 .RData
 .Rhistory
+/.gdb_history
