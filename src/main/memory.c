@@ -2635,7 +2635,6 @@ SEXP mkPROMISE(SEXP expr, SEXP rho)
     return s;
 }
 
-attribute_hidden /* would need to be in an installed header if not hidden */
 SEXP R_mkEVPROMISE(SEXP expr, SEXP val)
 {
     SEXP prom = mkPROMISE(expr, R_NilValue);
