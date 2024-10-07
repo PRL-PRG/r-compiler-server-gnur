@@ -2643,7 +2643,7 @@ SEXP R_mkEVPROMISE(SEXP expr, SEXP val)
     return prom;
 }
 
-attribute_hidden SEXP R_mkEVPROMISE_NR(SEXP expr, SEXP val)
+SEXP R_mkEVPROMISE_NR(SEXP expr, SEXP val)
 {
     SEXP prom = mkPROMISE(expr, R_NilValue);
     DISABLE_REFCNT(prom);
