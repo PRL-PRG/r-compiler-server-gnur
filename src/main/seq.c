@@ -139,7 +139,7 @@ static SEXP seq_colon(double n1, double n2, SEXP call)
     return ans;
 }
 
-attribute_hidden SEXP do_colon(SEXP call, SEXP op, SEXP args, SEXP rho)
+SEXP do_colon(SEXP call, SEXP op, SEXP args, SEXP rho)
 {
     checkArity(op, args);
     SEXP s1 = CAR(args),
