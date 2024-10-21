@@ -1049,7 +1049,7 @@ done:
     return ans;
 }
 
-attribute_hidden SEXP do_seq_along(SEXP call, SEXP op, SEXP args, SEXP rho)
+SEXP do_seq_along(SEXP call, SEXP op, SEXP args, SEXP rho)
 {
     SEXP ans;
     R_xlen_t len;
@@ -1085,7 +1085,7 @@ attribute_hidden SEXP do_seq_along(SEXP call, SEXP op, SEXP args, SEXP rho)
 	return R_compact_intrange(1, len);
 }
 
-attribute_hidden SEXP do_seq_len(SEXP call, SEXP op, SEXP args, SEXP rho)
+SEXP do_seq_len(SEXP call, SEXP op, SEXP args, SEXP rho)
 {
     R_xlen_t len;
 
