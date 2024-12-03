@@ -1967,6 +1967,8 @@ void SET_SCALAR_BVAL(SEXP x, Rbyte v);
 # define PROMISE_TAG(x) 0
 #endif
 
+int Rf_asLogical2(SEXP x, int checking, SEXP call);
+
 // ====================================================================
 // END RSH CHANGES
 // ====================================================================

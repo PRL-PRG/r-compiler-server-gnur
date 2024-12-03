@@ -1787,7 +1787,7 @@ attribute_hidden SEXP do_ascall(SEXP call, SEXP op, SEXP args, SEXP rho)
 
 
 /* return int, not Rboolean, for NA_LOGICAL : */
-attribute_hidden int asLogical2(SEXP x, int checking, SEXP call)
+int asLogical2(SEXP x, int checking, SEXP call)
 {
     int warn = 0;
 
