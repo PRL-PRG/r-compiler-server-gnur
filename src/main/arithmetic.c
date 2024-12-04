@@ -1739,7 +1739,7 @@ attribute_hidden SEXP do_log(SEXP call, SEXP op, SEXP args, SEXP env)
     return  do_log_builtin(call, op, args, env);
 }
 
-attribute_hidden SEXP do_log_builtin(SEXP call, SEXP op, SEXP args, SEXP env)
+SEXP do_log_builtin(SEXP call, SEXP op, SEXP args, SEXP env)
 {
     PROTECT(args);
     int n = length(args);
