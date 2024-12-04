@@ -335,12 +335,12 @@ INLINE_FUN R_xlen_t XTRUELENGTH(SEXP x)
     return (int *) STDVEC_DATAPTR(x);
 }
 /* This should not be Rboolean as could be NA_LOGICAL */
-HIDDEN INLINE_FUN int SCALAR_LVAL(SEXP x) {
+INLINE_FUN int SCALAR_LVAL(SEXP x) {
     CHECK_SCALAR_LGL(x);
     return LOGICAL(x)[0];
 }
 /* ditto */
-HIDDEN INLINE_FUN void SET_SCALAR_LVAL(SEXP x, int v) {
+INLINE_FUN void SET_SCALAR_LVAL(SEXP x, int v) {
     CHECK_SCALAR_LGL(x);
     LOGICAL(x)[0] = v;
 }
