@@ -2619,7 +2619,7 @@ SEXP EnsureLocal(SEXP symbol, SEXP rho, R_varloc_t *ploc)
 /* to prevent evaluation.  As an example consider */
 /* e <- quote(f(x=1,y=2); names(e) <- c("","a","b") */
 
-static SEXP R_valueSym = NULL; /* initialized in R_initEvalSymbols below */
+SEXP R_valueSym = NULL; /* initialized in R_initEvalSymbols below */
 
 static SEXP replaceCall(SEXP fun, SEXP val, SEXP args, SEXP rhs)
 {
