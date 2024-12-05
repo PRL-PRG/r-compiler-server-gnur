@@ -372,7 +372,7 @@ HIDDEN INLINE_FUN void SET_SCALAR_CVAL(SEXP x, Rcomplex v) {
     COMPLEX0(x)[0] = v;
 }
 
-HIDDEN INLINE_FUN Rbyte *RAW0(SEXP x) {
+INLINE_FUN Rbyte *RAW0(SEXP x) {
     CHECK_STDVEC_RAW(x);
     return (Rbyte *) STDVEC_DATAPTR(x);
 }
