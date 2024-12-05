@@ -5515,7 +5515,7 @@ typedef struct { SEXP const *p; } R_bcconsts_t;
 #define BCCONSTS_LEN(e) XLENGTH(BCODE_CONSTS(e))
 #define GETCONST(x, i) ((x).p)[i]
 
-NORET static void nodeStackOverflow(void)
+NORET void nodeStackOverflow(void)
 {
     /* condition is pre-allocated and protected with R_PreserveObject */
     SEXP cond = R_getNodeStackOverflowError();
