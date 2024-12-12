@@ -4975,7 +4975,7 @@ static R_INLINE R_bcstack_t *bcStackScalarReal(R_bcstack_t *s, R_bcstack_t *v)
 	Builtin2(do_logic, opsym, rho);		\
     } while (0)
 
-static R_INLINE SEXP getPrimitive(SEXP symbol, SEXPTYPE type)
+SEXP getPrimitive(SEXP symbol, SEXPTYPE type)
 {
     SEXP value = SYMVALUE(symbol);
     if (TYPEOF(value) == PROMSXP) {
