@@ -1216,7 +1216,7 @@ static R_INLINE SEXP findGlobalVar(SEXP symbol)
 }
 #endif
 
-attribute_hidden SEXP R_findVar(SEXP symbol, SEXP rho)
+SEXP R_findVar(SEXP symbol, SEXP rho)
 {
     SEXP vl;
 
