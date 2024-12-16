@@ -1561,10 +1561,6 @@ void R_SetPPSize(R_size_t);
 void R_SetNconn(int);
 
 void R_expand_binding_value(SEXP);
-#ifdef IMMEDIATE_PROMISE_VALUES
-SEXP R_expand_promise_value(SEXP);
-#endif
-
 void R_args_enable_refcnt(SEXP);
 void R_try_clear_args_refcnt(SEXP);
 

@@ -4400,7 +4400,7 @@ attribute_hidden void R_expand_binding_value(SEXP b)
 }
 
 #ifdef IMMEDIATE_PROMISE_VALUES
-attribute_hidden SEXP R_expand_promise_value(SEXP x)
+SEXP R_expand_promise_value(SEXP x)
 {
     if (PROMISE_TAG(x))
 	R_expand_binding_value(x);

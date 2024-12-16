@@ -30,6 +30,16 @@
 #ifndef R_INTERNALS_H_
 #define R_INTERNALS_H_
 
+#if ( SIZEOF_SIZE_T < SIZEOF_DOUBLE )
+# define BOXED_BINDING_CELLS 1
+#else
+# define BOXED_BINDING_CELLS 0
+# define IMMEDIATE_PROMISE_VALUES
+#endif
+
+/* probably no longer needed */
+#define NEW_CONDITION_HANDLING
+
 #ifdef __cplusplus
 # include <cstdio>
 # include <climits>
@@ -1999,6 +2009,10 @@ typedef struct {
 # define IS_PARTIAL_SXP_TAG(x) ((x) & PARTIALSXP_MASK)
 # define RAWMEM_TAG 254
 # define CACHESZ_TAG 253
+
+#ifdef IMMEDIATE_PROMISE_VALUES
+SEXP R_expand_promise_value(SEXP);
+#endif
 
 // ====================================================================
 // END RSH CHANGES
