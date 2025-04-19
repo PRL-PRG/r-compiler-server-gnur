@@ -32,6 +32,7 @@
 #include <errno.h>
 #include <math.h>
 
+SEXP rcpEval(SEXP, SEXP);
 SEXP bcEval(SEXP, SEXP);
 static void bcEval_init(void);
 
@@ -1114,7 +1115,6 @@ SEXP eval(SEXP e, SEXP rho)
     case ENVSXP:
     case CLOSXP:
     case VECSXP:
-    case EXTPTRSXP:
     case WEAKREFSXP:
     case EXPRSXP:
 	/* Make sure constants in expressions are NAMED before being
@@ -1163,6 +1163,12 @@ SEXP eval(SEXP e, SEXP rho)
 #endif
 
     switch (TYPEOF(e)) {
+	case EXTPTRSXP:
+	if(IS_RCP_PTR(e))
+		tmp = rcpEval(e, rho);
+	else
+		tmp = e;
+	break;
     case BCODESXP:
 	tmp = bcEval(e, rho);
 	    break;
@@ -1597,7 +1603,7 @@ static R_INLINE Rboolean R_CheckJIT(SEXP fun)
 
     SEXP body = BODY(fun);
 
-    if (R_jit_enabled > 0 && TYPEOF(body) != BCODESXP &&
+    if (R_jit_enabled > 0 && !IS_RCP_PTR(body) && TYPEOF(body) != BCODESXP &&
 	! R_disable_bytecode && ! NOJIT(fun)) {
 
 	if (MAYBEJIT(fun)) {
@@ -7502,6 +7508,15 @@ static R_INLINE void finish_force_promise(void)
      ! RSTEP(fun) && ! RDEBUG(rho) &&				\
      R_GlobalContext->callflag != CTXT_GENERIC)
 
+SEXP rcpEval(SEXP body, SEXP rho)
+{
+  const rcp_exec_ptrs* ptrs = (const rcp_exec_ptrs*)EXTPTR_PTR(body);
+  for (size_t i = 0; i < ptrs->bcells_size; ++i)
+    ptrs->bcells[i] = R_NilValue;
+  SEXP res = ptrs->eval(rho);
+  return res;
+}
+
 static SEXP bcEval_loop(struct bcEval_locals *);
 
 SEXP bcEval(SEXP body, SEXP rho)
@@ -8786,7 +8801,7 @@ static int findOp(void *addr)
     return 0; /* not reached */
 }
 
-attribute_hidden SEXP R_bcDecode(SEXP code) {
+SEXP R_bcDecode(SEXP code) {
     int n, i, j, *ipc;
     BCODE *pc;
     SEXP bytes;

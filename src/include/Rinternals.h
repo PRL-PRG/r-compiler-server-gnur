@@ -2015,6 +2015,27 @@ SEXP R_expand_promise_value(SEXP);
 #endif
 
 // ====================================================================
+// RPC (copy-and-patch)
+// ====================================================================
+
+typedef struct rcp_exec_ptrs
+{
+    SEXP (*eval)(SEXP);
+    SEXP * bcells;
+    size_t bcells_size;
+    void* memory_high;
+    size_t memory_high_size;
+    void* memory_low;
+    size_t memory_low_size;
+} rcp_exec_ptrs;
+
+void R_RcpFree(SEXP);
+
+#define RCP_PTRTAG "rcp_exec_ptrs"
+
+#define IS_RCP_PTR(fun) (TYPEOF(fun) == EXTPTRSXP && strcmp(CHAR(PRINTNAME(EXTPTR_TAG(fun))), RCP_PTRTAG) == 0)
+
+// ====================================================================
 // END RSH CHANGES
 // ====================================================================
 

@@ -76,6 +76,8 @@
 # include "valgrind/memcheck.h"
 #endif
 
+#include <sys/mman.h>
+
 /* For speed in cases when the argument is known to not be an ALTREP list. */
 #define VECTOR_ELT_0(x,i)        ((SEXP *) STDVEC_DATAPTR(x))[i]
 #define SET_VECTOR_ELT_0(x,i, v) (((SEXP *) STDVEC_DATAPTR(x))[i] = (v))
@@ -4947,6 +4949,27 @@ attribute_hidden void R_FreeStringBufferL(R_StringBuffer *buf)
 	buf->data = NULL;
     }
 }
+
+void R_RcpFree(SEXP ptr)
+{
+	if(!IS_RCP_PTR(ptr))
+		error("Attemted to free a non-rcp pointer");
+
+	rcp_exec_ptrs* ptrs = (rcp_exec_ptrs*)EXTPTR_PTR(ptr);
+    if(ptrs)
+    {
+        munmap(ptrs->memory_high, ptrs->memory_high_size);
+        ptrs->memory_high = NULL;
+        ptrs->memory_high_size = 0;
+        munmap(ptrs->memory_low, ptrs->memory_low_size);
+        ptrs->memory_low = NULL;
+        ptrs->memory_low_size = 0;
+
+        free(ptrs);
+        EXTPTR_PTR(ptr) = NULL;
+    }
+}
+
 
 /* ======== This needs direct access to gp field for efficiency ======== */
 
