@@ -7510,10 +7510,30 @@ static R_INLINE void finish_force_promise(void)
 
 SEXP rcpEval(SEXP body, SEXP rho)
 {
-  const rcp_exec_ptrs* ptrs = (const rcp_exec_ptrs*)EXTPTR_PTR(body);
+  rcp_exec_ptrs* ptrs = (rcp_exec_ptrs*)EXTPTR_PTR(body);
+
+  for (size_t i = 0; i < ptrs->bcells_size; ++i)
+  {
+	R_BCNodeStackTop->tag = 0;
+	R_BCNodeStackTop->flags = 0;
+	R_BCNodeStackTop->u.sxpval = ptrs->bcells[i];
+	R_BCNodeStackTop++;
+  }
+
   for (size_t i = 0; i < ptrs->bcells_size; ++i)
     ptrs->bcells[i] = R_NilValue;
-  SEXP res = ptrs->eval(rho);
+
+  SEXP rho_old = *(ptrs->rho);
+  *(ptrs->rho) = rho;
+
+  SEXP res = ptrs->eval();
+
+
+  for (size_t i = 0; i < ptrs->bcells_size; ++i)
+  	ptrs->bcells[i] = (--R_BCNodeStackTop)->u.sxpval;
+
+  *(ptrs->rho) = rho_old;
+
   return res;
 }
 

@@ -2020,7 +2020,8 @@ SEXP R_expand_promise_value(SEXP);
 
 typedef struct rcp_exec_ptrs
 {
-    SEXP (*eval)(SEXP);
+    SEXP (*eval)();
+    SEXP * rho;
     SEXP * bcells;
     size_t bcells_size;
     void* memory_high;
