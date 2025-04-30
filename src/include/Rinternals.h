@@ -2024,10 +2024,11 @@ typedef struct rcp_exec_ptrs
     SEXP * rho;
     SEXP * bcells;
     size_t bcells_size;
-    void* memory_high;
-    size_t memory_high_size;
-    void* memory_low;
-    size_t memory_low_size;
+    void* memory_private;
+    size_t memory_private_size;
+    void* memory_shared;
+    size_t memory_shared_size;
+    size_t* memory_shared_refcount;
 } rcp_exec_ptrs;
 
 void R_RcpFree(SEXP);

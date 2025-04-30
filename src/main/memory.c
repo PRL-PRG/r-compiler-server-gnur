@@ -4958,12 +4958,18 @@ void R_RcpFree(SEXP ptr)
 	rcp_exec_ptrs* ptrs = (rcp_exec_ptrs*)EXTPTR_PTR(ptr);
     if(ptrs)
     {
-        munmap(ptrs->memory_high, ptrs->memory_high_size);
-        ptrs->memory_high = NULL;
-        ptrs->memory_high_size = 0;
-        munmap(ptrs->memory_low, ptrs->memory_low_size);
-        ptrs->memory_low = NULL;
-        ptrs->memory_low_size = 0;
+        munmap(ptrs->memory_private, ptrs->memory_private_size);
+        ptrs->memory_private = NULL;
+        ptrs->memory_private_size = 0;
+        
+        if(ptrs->memory_shared_refcount != NULL && --(*ptrs->memory_shared_refcount) == 0)
+        {
+            munmap(ptrs->memory_shared, ptrs->memory_shared_size);
+            free(ptrs->memory_shared_refcount);
+        }
+        ptrs->memory_shared = NULL;
+        ptrs->memory_shared_size = 0;
+        ptrs->memory_shared_refcount = NULL;
 
         free(ptrs);
         EXTPTR_PTR(ptr) = NULL;
