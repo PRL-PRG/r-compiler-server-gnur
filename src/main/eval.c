@@ -1165,9 +1165,9 @@ SEXP eval(SEXP e, SEXP rho)
     switch (TYPEOF(e)) {
 	case EXTPTRSXP:
 	if(IS_RCP_PTR(e))
-		tmp = rcpEval(e, rho);
+	    tmp = rcpEval(e, rho);
 	else
-		tmp = e;
+	    tmp = e;
 	break;
     case BCODESXP:
 	tmp = bcEval(e, rho);
@@ -7510,15 +7510,15 @@ static R_INLINE void finish_force_promise(void)
 
 SEXP rcpEval(SEXP body, SEXP rho)
 {
-  rcp_exec_ptrs* const ptrs = (rcp_exec_ptrs* const)EXTPTR_PTR(body);
+  rcp_exec_ptrs* ptrs = (rcp_exec_ptrs*)EXTPTR_PTR(body);
 
-  /* backup current bcells and rho - needed to support recursion */
+  /* save current bcells and rho - needed to support recursion */
   for (size_t i = 0; i < ptrs->bcells_size; ++i)
   {
-	R_BCNodeStackTop->tag = 0;
-	R_BCNodeStackTop->flags = 0;
-	R_BCNodeStackTop->u.sxpval = ptrs->bcells[i];
-	R_BCNodeStackTop++;
+    R_BCNodeStackTop->tag = 0;
+    R_BCNodeStackTop->flags = 0;
+    R_BCNodeStackTop->u.sxpval = ptrs->bcells[i];
+    R_BCNodeStackTop++;
   }
   const SEXP rho_old = *(ptrs->rho);
 
@@ -7528,7 +7528,7 @@ SEXP rcpEval(SEXP body, SEXP rho)
 
   *(ptrs->rho) = rho;
 
-  /* back up current globals in case of error */
+  /* save current globals */
   struct bcEval_globals globals;
   save_bcEval_globals(&globals);
 
@@ -7539,7 +7539,7 @@ SEXP rcpEval(SEXP body, SEXP rho)
   restore_bcEval_globals(&globals);
   *(ptrs->rho) = rho_old;
   for (size_t i = 0; i < ptrs->bcells_size; ++i)
-  	ptrs->bcells[i] = (--R_BCNodeStackTop)->u.sxpval;
+    ptrs->bcells[i] = (--R_BCNodeStackTop)->u.sxpval;
 
   return res;
 }

@@ -2020,10 +2020,15 @@ SEXP R_expand_promise_value(SEXP);
 
 typedef struct rcp_exec_ptrs
 {
+    // Executable code
     SEXP (*eval)();
+
+    // Local internal variables to set before execution (do not free!)
     SEXP * rho;
     SEXP * bcells;
     size_t bcells_size;
+
+    // Memory management
     void* memory_private;
     size_t memory_private_size;
     void* memory_shared;

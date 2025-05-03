@@ -4952,27 +4952,25 @@ attribute_hidden void R_FreeStringBufferL(R_StringBuffer *buf)
 
 void R_RcpFree(SEXP ptr)
 {
-	if(!IS_RCP_PTR(ptr))
-		error("Attemted to free a non-rcp pointer");
+    if(!IS_RCP_PTR(ptr))
+	error("Attemted to free a non-rcp pointer");
 
-	rcp_exec_ptrs* ptrs = (rcp_exec_ptrs*)EXTPTR_PTR(ptr);
+    rcp_exec_ptrs* ptrs = (rcp_exec_ptrs*)EXTPTR_PTR(ptr);
     if(ptrs)
     {
-        munmap(ptrs->memory_private, ptrs->memory_private_size);
-        ptrs->memory_private = NULL;
-        ptrs->memory_private_size = 0;
+	/* unmap private memory */
+	munmap(ptrs->memory_private, ptrs->memory_private_size);
         
-        if(ptrs->memory_shared_refcount != NULL && --(*ptrs->memory_shared_refcount) == 0)
-        {
-            munmap(ptrs->memory_shared, ptrs->memory_shared_size);
-            free(ptrs->memory_shared_refcount);
-        }
-        ptrs->memory_shared = NULL;
-        ptrs->memory_shared_size = 0;
-        ptrs->memory_shared_refcount = NULL;
+	/* unmap shared memory, if this is it's only use */
+	if(ptrs->memory_shared_refcount != NULL && --(*ptrs->memory_shared_refcount) == 0)
+	{
+	    munmap(ptrs->memory_shared, ptrs->memory_shared_size);
+	    free(ptrs->memory_shared_refcount);
+	}
 
-        free(ptrs);
-        EXTPTR_PTR(ptr) = NULL;
+	/* free the structure itself */
+	free(ptrs);
+	EXTPTR_PTR(ptr) = NULL;
     }
 }
 
