@@ -7488,9 +7488,9 @@ static R_INLINE void finish_force_promise(void)
 
 SEXP rcpEval(SEXP body, SEXP rho)
 {
-  rcp_exec_ptrs* const ptrs = (rcp_exec_ptrs* const)EXTPTR_PTR(body);
+  rcp_exec_ptrs* ptrs = (rcp_exec_ptrs*)EXTPTR_PTR(body);
 
-  /* backup current bcells and rho - needed to support recursion */
+  /* save current bcells and rho - needed to support recursion */
   for (size_t i = 0; i < ptrs->bcells_size; ++i)
   {
 	R_BCNodeStackTop->tag = 0;
@@ -7506,7 +7506,7 @@ SEXP rcpEval(SEXP body, SEXP rho)
 
   *(ptrs->rho) = rho;
 
-  /* back up current globals in case of error */
+  /* save current globals */
   struct bcEval_globals globals;
   save_bcEval_globals(&globals);
 

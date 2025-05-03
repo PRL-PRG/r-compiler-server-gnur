@@ -4976,19 +4976,17 @@ void R_RcpFree(SEXP ptr)
 	rcp_exec_ptrs* ptrs = (rcp_exec_ptrs*)EXTPTR_PTR(ptr);
     if(ptrs)
     {
+	/* unmap private memory */
         munmap(ptrs->memory_private, ptrs->memory_private_size);
-        ptrs->memory_private = NULL;
-        ptrs->memory_private_size = 0;
         
+	/* unmap shared memory, if this is it's only use */
         if(ptrs->memory_shared_refcount != NULL && --(*ptrs->memory_shared_refcount) == 0)
         {
             munmap(ptrs->memory_shared, ptrs->memory_shared_size);
             free(ptrs->memory_shared_refcount);
         }
-        ptrs->memory_shared = NULL;
-        ptrs->memory_shared_size = 0;
-        ptrs->memory_shared_refcount = NULL;
 
+	/* free the structure itself */
         free(ptrs);
         EXTPTR_PTR(ptr) = NULL;
     }
