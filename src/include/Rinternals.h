@@ -1962,6 +1962,9 @@ void SET_SCALAR_CVAL(SEXP x, Rcomplex v);
 void SET_SCALAR_BVAL(SEXP x, Rbyte v);
 #endif
 
+int (BNDCELL_TAG)(SEXP e);
+
+#ifdef USE_RINTERNALS
 #ifdef IMMEDIATE_PROMISE_VALUES
 # define PRVALUE0(x) ((x)->u.promsxp.value)
 # define PRVALUE(x) \
@@ -1975,6 +1978,7 @@ void SET_SCALAR_BVAL(SEXP x, Rbyte v);
 # define PRVALUE(x) PRVALUE0(x)
 # define PROMISE_IS_EVALUATED(x) (PRVALUE(x) != R_UnboundValue)
 # define PROMISE_TAG(x) 0
+#endif
 #endif
 
 int Rf_asLogical2(SEXP x, int checking, SEXP call);
