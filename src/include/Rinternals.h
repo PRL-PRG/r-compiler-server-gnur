@@ -211,6 +211,12 @@ typedef struct SEXPREC *SEXP;
 // - copied from Defn.h
 // ====================================================================
 
+typedef SEXP (*Rsh_closure)(SEXP, SEXP);
+
+LibExtern SEXP Rsh_ClosureBodyTag;
+
+#define RSH_IS_CLOSURE_BODY(e) (R_ExternalPtrTag((e)) == Rsh_ClosureBodyTag)
+
 // ======================= USE_RINTERNALS section
 #ifdef USE_RINTERNALS
 /* This is intended for use only within R itself.
