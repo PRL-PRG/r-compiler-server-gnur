@@ -2024,6 +2024,45 @@ typedef struct {
 SEXP R_expand_promise_value(SEXP);
 #endif
 
+# include <setjmp.h>
+# define JMP_BUF sigjmp_buf
+typedef struct R_bcFrame R_bcFrame_type;
+/* Evaluation Context Structure */
+typedef struct RCNTXT {
+    struct RCNTXT *nextcontext;	/* The next context up the chain */
+    int callflag;		/* The context "type" */
+    JMP_BUF cjmpbuf;		/* C stack and register information */
+    int cstacktop;		/* Top of the pointer protection stack */
+    int evaldepth;	        /* evaluation depth at inception */
+    SEXP promargs;		/* Promises supplied to closure */
+    SEXP callfun;		/* The closure called */
+    SEXP sysparent;		/* environment the closure was called from */
+    SEXP call;			/* The call that effected this context*/
+    SEXP cloenv;		/* The environment */
+    SEXP conexit;		/* Interpreted "on.exit" code */
+    void (*cend)(void *);	/* C "on.exit" thunk */
+    void *cenddata;		/* data for C "on.exit" thunk */
+    void *vmax;		        /* top of R_alloc stack */
+    int intsusp;                /* interrupts are suspended */
+    int gcenabled;		/* R_GCEnabled value */
+    int bcintactive;            /* R_BCIntActive value */
+    SEXP bcbody;                /* R_BCbody value */
+    void* bcpc;                 /* R_BCpc value */
+    ptrdiff_t relpc;            /* pc offset when begincontext is called */
+    SEXP handlerstack;          /* condition handler stack */
+    SEXP restartstack;          /* stack of available restarts */
+    struct RPRSTACK *prstack;   /* stack of pending promises */
+    R_bcstack_t *nodestack;
+    R_bcstack_t *bcprottop;
+    R_bcFrame_type *bcframe;
+    SEXP srcref;	        /* The source line in effect */
+    int browserfinish;          /* should browser finish this context without
+                                   stopping */
+    R_bcstack_t returnValue;    /* only set during on.exit calls */
+    struct RCNTXT *jumptarget;	/* target for a continuing jump */
+    int jumpmask;               /* associated LONGJMP argument */
+} RCNTXT, *context;
+
 // ====================================================================
 // END RSH CHANGES
 // ====================================================================
