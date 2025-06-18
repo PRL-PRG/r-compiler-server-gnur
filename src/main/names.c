@@ -1247,6 +1247,8 @@ attribute_hidden void InitNames(void)
     initializeDDVALSymbols();
     R_initialize_bcode();
     R_init_altrep();
+
+    Rsh_ClosureBodyTag = install("Rsh_ClosureBodyTag");
 }
 
 
