@@ -2112,10 +2112,6 @@ typedef struct rcp_exec_ptrs
 
 void R_RcpFree(SEXP);
 
-#define RCP_PTRTAG "rcp_exec_ptrs"
-
-#define IS_RCP_PTR(fun) (TYPEOF(fun) == EXTPTRSXP && strcmp(CHAR(PRINTNAME(EXTPTR_TAG(fun))), RCP_PTRTAG) == 0)
-
 // ====================================================================
 // END RSH CHANGES
 // ====================================================================
