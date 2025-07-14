@@ -1168,8 +1168,6 @@ SEXP eval(SEXP e, SEXP rho)
 		tmp = rcpEval(e, rho);
 	else if (RSH_IS_CLOSURE_BODY(e)) {
 		SEXP c_cp = R_ExternalPtrProtected(e);
-		if (TYPEOF(c_cp) != VECSXP)
-			Rf_error("Expected a vector, got: %d", TYPEOF(c_cp));
 
 		// seems like unnecesary complicated casting, but otherwise C complains
 		// cf. https://stackoverflow.com/a/19487645
