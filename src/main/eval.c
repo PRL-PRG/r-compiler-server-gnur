@@ -1165,11 +1165,6 @@ SEXP eval(SEXP e, SEXP rho)
     switch (TYPEOF(e)) {
     case EXTPTRSXP:
       if (RSH_IS_CLOSURE_BODY(e)) {
-        SEXP c_cp = R_ExternalPtrProtected(e);
-        if (TYPEOF(c_cp) != VECSXP) {
-          Rf_error("Expected a vector, got: %d", TYPEOF(c_cp));
-        }
-
         tmp = rcpEval(e, rho);
       } else {
         tmp = e;
