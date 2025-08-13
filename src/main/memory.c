@@ -4964,8 +4964,9 @@ void R_RcpFree(SEXP ptr)
 	/* unmap shared memory, if this is it's only use */
 	if(ptrs->memory_shared_refcount != NULL && --(*ptrs->memory_shared_refcount) == 0)
 	{
-	    munmap(ptrs->memory_shared, ptrs->memory_shared_size);
-	    free(ptrs->memory_shared_refcount);
+    munmap(ptrs->memory_shared_near, ptrs->memory_shared_size);
+    munmap(ptrs->memory_shared_low, ptrs->memory_shared_size);
+	free(ptrs->memory_shared_refcount);
 	}
 
 	/* free the structure itself */

@@ -2105,7 +2105,8 @@ typedef struct rcp_exec_ptrs
     // Memory management
     void* memory_private;
     size_t memory_private_size;
-    void* memory_shared;
+    void* memory_shared_near;
+    void* memory_shared_low;
     size_t memory_shared_size;
     size_t* memory_shared_refcount;
 } rcp_exec_ptrs;
