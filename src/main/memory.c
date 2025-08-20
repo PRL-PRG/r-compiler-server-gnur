@@ -4950,9 +4950,34 @@ attribute_hidden void R_FreeStringBufferL(R_StringBuffer *buf)
     }
 }
 
+void R_RcpSharedFree(SEXP ptr)
+{
+    rcp_sharedmem_ptrs* ptrs = R_ExternalPtrAddr(ptr);
+
+    if(ptrs)
+    {
+    /* unmap shared memory */
+    if (ptrs->memory_shared_near)
+    {
+        munmap(ptrs->memory_shared_near, ptrs->memory_shared_size);
+        ptrs->memory_shared_near = NULL;
+    }
+    if (ptrs->memory_shared_low)
+    {
+        munmap(ptrs->memory_shared_low, ptrs->memory_shared_size);
+        ptrs->memory_shared_low = NULL;
+    }
+    ptrs->memory_shared_size = 0;
+
+    /* free the structure itself */
+    Free(ptrs);
+    EXTPTR_PTR(ptr) = NULL;
+    }
+}
+
 void R_RcpFree(SEXP ptr)
 {
-    if(TYPEOF(ptr) != EXTPTRSXP || !RSH_IS_CLOSURE_BODY(ptr))
+    if(!RSH_IS_CLOSURE_BODY(ptr))
 	error("Attemted to free a non-rcp pointer");
 
     rcp_exec_ptrs* ptrs = (rcp_exec_ptrs*)EXTPTR_PTR(ptr);
@@ -4960,17 +4985,9 @@ void R_RcpFree(SEXP ptr)
     {
 	/* unmap private memory */
 	munmap(ptrs->memory_private, ptrs->memory_private_size);
-        
-	/* unmap shared memory, if this is it's only use */
-	if(ptrs->memory_shared_refcount != NULL && --(*ptrs->memory_shared_refcount) == 0)
-	{
-    munmap(ptrs->memory_shared_near, ptrs->memory_shared_size);
-    munmap(ptrs->memory_shared_low, ptrs->memory_shared_size);
-	free(ptrs->memory_shared_refcount);
-	}
 
 	/* free the structure itself */
-	free(ptrs);
+	Free(ptrs);
 	EXTPTR_PTR(ptr) = NULL;
     }
 }
