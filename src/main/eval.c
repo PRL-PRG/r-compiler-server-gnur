@@ -2246,7 +2246,7 @@ static R_INLINE SEXP handle_exec_continuation(SEXP val)
 static R_INLINE SEXP R_execClosure(SEXP call, SEXP newrho, SEXP sysparent,
                                    SEXP rho, SEXP arglist, SEXP op);
 
-static SEXP make_applyClosure_env(SEXP call, SEXP op, SEXP arglist, SEXP rho,
+SEXP make_applyClosure_env(SEXP call, SEXP op, SEXP arglist, SEXP rho,
 				  SEXP suppliedvars)
 {
     SEXP formals, actuals, savedrho, newrho;
