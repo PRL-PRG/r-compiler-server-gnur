@@ -743,7 +743,7 @@ R_FUNTYPES(SEXP, S, SEXP)
 /* typedef void (*FUNV1)(void *); */
 R_FUNTYPES(void, V, void *)
 
-attribute_hidden SEXP R_doDotCall(DL_FUNC fun, int nargs, SEXP *cargs,
+SEXP R_doDotCall(DL_FUNC fun, int nargs, SEXP *cargs,
 				  SEXP call) {
     SEXP retval = R_NilValue;	/* -Wall */
     switch (nargs) {
