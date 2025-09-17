@@ -175,7 +175,6 @@ checkValidSymbolId(SEXP op, SEXP call, DL_FUNC *fun,
     return; /* not reached */
 }
 
-attribute_hidden
 DL_FUNC R_dotCallFn(SEXP op, SEXP call, int nargs) {
     R_RegisteredNativeSymbol symbol = {R_CALL_SYM, {NULL}, NULL};
     DL_FUNC fun = NULL;
