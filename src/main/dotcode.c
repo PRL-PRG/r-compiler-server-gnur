@@ -1402,7 +1402,7 @@ SEXP R_doDotCall(DL_FUNC fun, int nargs, SEXP *cargs,
 }
 
 /* .Call(name, <args>) */
-attribute_hidden SEXP do_dotcall(SEXP call, SEXP op, SEXP args, SEXP env)
+SEXP do_dotcall(SEXP call, SEXP op, SEXP args, SEXP env)
 {
     DL_FUNC ofun = NULL;
     SEXP retval, cargs[MAX_ARGS], pargs;
