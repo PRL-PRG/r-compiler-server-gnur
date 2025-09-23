@@ -890,7 +890,7 @@ void R_CheckTimeLimits(void);
 
 #define R_BCNODESTACKSIZE 300000
 LibExtern R_bcstack_t *R_BCNodeStackTop, *R_BCNodeStackEnd;
-extern0 R_bcstack_t *R_BCNodeStackBase;
+LibExtern R_bcstack_t *R_BCNodeStackBase;
 LibExtern R_bcstack_t *R_BCProtTop;
 extern0 int R_jit_enabled INI_as(0); /* has to be 0 during R startup */
 extern0 int R_compile_pkgs INI_as(0);
