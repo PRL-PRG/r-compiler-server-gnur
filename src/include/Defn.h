@@ -772,7 +772,7 @@ void R_ReleaseMSet(SEXP mset, int keepSize);
 
 /* Evaluation Environment */
 extern0 SEXP	R_CurrentExpr;	    /* Currently evaluating expression */
-extern0 SEXP	R_ReturnedValue;    /* Slot for return-ing values */
+extern SEXP	R_ReturnedValue;    /* Slot for return-ing values */
 extern0 SEXP*	R_SymbolTable;	    /* The symbol table */
 #ifdef R_USE_SIGNALS
 extern0 RCNTXT R_Toplevel;	      /* Storage for the toplevel context */
