@@ -772,7 +772,7 @@ void R_ReleaseMSet(SEXP mset, int keepSize);
 
 /* Evaluation Environment */
 extern0 SEXP	R_CurrentExpr;	    /* Currently evaluating expression */
-extern0 SEXP	R_ReturnedValue;    /* Slot for return-ing values */
+extern SEXP	R_ReturnedValue;    /* Slot for return-ing values */
 extern0 SEXP*	R_SymbolTable;	    /* The symbol table */
 #ifdef R_USE_SIGNALS
 extern0 RCNTXT R_Toplevel;	      /* Storage for the toplevel context */
@@ -890,7 +890,7 @@ void R_CheckTimeLimits(void);
 
 #define R_BCNODESTACKSIZE 300000
 LibExtern R_bcstack_t *R_BCNodeStackTop, *R_BCNodeStackEnd;
-extern0 R_bcstack_t *R_BCNodeStackBase;
+LibExtern R_bcstack_t *R_BCNodeStackBase;
 LibExtern R_bcstack_t *R_BCProtTop;
 extern0 int R_jit_enabled INI_as(0); /* has to be 0 during R startup */
 extern0 int R_compile_pkgs INI_as(0);
