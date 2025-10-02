@@ -2107,7 +2107,7 @@ typedef struct rcp_exec_ptrs
     // Local internal variables to set before execution (do not free!)
     SEXP * rho;
     SEXP * bcells;
-    size_t bcells_size;
+    int bcells_size;
 
     // Memory management
     void* memory_private;

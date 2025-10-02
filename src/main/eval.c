@@ -7524,7 +7524,7 @@ SEXP rcpEval(SEXP body, SEXP rho)
   const SEXP rho_old = *(ptrs->rho);
 
   /* set up the new bcells and rho */
-  for (size_t i = 0; i < ptrs->bcells_size; ++i)
+  for (int i = 0; i < ptrs->bcells_size; ++i)
     ptrs->bcells[i] = R_NilValue;
 
   *(ptrs->rho) = rho;
@@ -7539,7 +7539,7 @@ SEXP rcpEval(SEXP body, SEXP rho)
   /* restore everything to previous state */
   restore_bcEval_globals(&globals);
   *(ptrs->rho) = rho_old;
-  for (size_t i = 0; i < ptrs->bcells_size; ++i)
+  for (int i = ptrs->bcells_size - 1; i >= 0; --i)
     ptrs->bcells[i] = (--R_BCNodeStackTop)->u.sxpval;
 
   return res;
