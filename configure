@@ -9057,7 +9057,7 @@ else case e in #(
   e) r_cv_visibility_attribute=no
 case "${host_os}" in
     darwin*)
-            r_cv_visibility_attribute=yes
+            r_cv_visibility_attribute=no
       ;;
 
   *)
@@ -9075,7 +9075,7 @@ EOF
   printf "%s\n" "$as_me:${as_lineno-$LINENO}: \$? = $ac_status" >&5
   test $ac_status = 0; }; }; then
         if grep '\.hidden.*foo' conftest.s >/dev/null; then
-           r_cv_visibility_attribute=yes
+           r_cv_visibility_attribute=no
         fi
       fi
       ;;
