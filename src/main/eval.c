@@ -7513,6 +7513,10 @@ SEXP rcpEval(SEXP body, SEXP rho)
 {
   rcp_exec_ptrs* ptrs = (rcp_exec_ptrs*)EXTPTR_PTR(body);
 
+  /* check if we have enough free space on the stack */
+  if (R_BCNodeStackTop + ptrs->bcells_size + ptrs->max_stack_size > R_BCNodeStackEnd)
+    nodeStackOverflow();
+
   /* save current bcells and rho - needed to support recursion */
   for (size_t i = 0; i < ptrs->bcells_size; ++i)
   {
@@ -7533,8 +7537,17 @@ SEXP rcpEval(SEXP body, SEXP rho)
   struct bcEval_globals globals;
   save_bcEval_globals(&globals);
 
+  /* Precallocate memory on the stack */
+  R_bcstack_t* stack_base = R_BCNodeStackTop;
+  for (int i = 0; i < ptrs->max_stack_size; i++) {
+    R_BCNodeStackTop->tag = INTSXP;
+    R_BCNodeStackTop->flags = 0;
+    R_BCNodeStackTop->u.ival = 123456789;
+    R_BCNodeStackTop++;
+  }
+
   /* run the actual copy-patched code */
-  SEXP res = ptrs->eval();
+  SEXP res = ptrs->eval(stack_base);
 
   /* restore everything to previous state */
   restore_bcEval_globals(&globals);

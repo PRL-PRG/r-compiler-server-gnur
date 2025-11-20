@@ -2102,12 +2102,13 @@ typedef struct rcp_sharedmem_ptrs
 typedef struct rcp_exec_ptrs
 {
     // Executable code
-    SEXP (*eval)();
+    SEXP (*eval)(R_bcstack_t* stack);
 
     // Local internal variables to set before execution (do not free!)
     SEXP * rho;
     SEXP * bcells;
     int bcells_size;
+    int max_stack_size;
 
     // Memory management
     void* memory_private;
