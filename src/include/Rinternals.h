@@ -2099,14 +2099,17 @@ typedef struct rcp_sharedmem_ptrs
     size_t memory_shared_size;
 } rcp_sharedmem_ptrs;
 
+typedef struct rcpEval_locals {
+    const SEXP rho;
+    SEXP vcache[];
+} rcpEval_locals;
+
 typedef struct rcp_exec_ptrs
 {
     // Executable code
-    SEXP (*eval)(R_bcstack_t* stack);
+    SEXP (*eval)(R_bcstack_t* stack, rcpEval_locals* locals);
 
-    // Local internal variables to set before execution (do not free!)
-    SEXP * rho;
-    SEXP * bcells;
+    // Sizes of required runtime structures
     int bcells_size;
     int max_stack_size;
 
@@ -2114,6 +2117,7 @@ typedef struct rcp_exec_ptrs
     void* memory_private;
     size_t memory_private_size;
 } rcp_exec_ptrs;
+
 
 void R_RcpSharedFree(SEXP);
 void R_RcpFree(SEXP);

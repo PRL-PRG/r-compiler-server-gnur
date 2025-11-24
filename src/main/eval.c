@@ -7514,28 +7514,21 @@ SEXP rcpEval(SEXP body, SEXP rho)
   rcp_exec_ptrs* ptrs = (rcp_exec_ptrs*)EXTPTR_PTR(body);
 
   /* check if we have enough free space on the stack */
-  if (R_BCNodeStackTop + ptrs->bcells_size + ptrs->max_stack_size > R_BCNodeStackEnd)
+  if (R_BCNodeStackTop + ptrs->max_stack_size > R_BCNodeStackEnd)
     nodeStackOverflow();
-
-  /* save current bcells and rho - needed to support recursion */
-  for (size_t i = 0; i < ptrs->bcells_size; ++i)
-  {
-    R_BCNodeStackTop->tag = 0;
-    R_BCNodeStackTop->flags = 0;
-    R_BCNodeStackTop->u.sxpval = ptrs->bcells[i];
-    R_BCNodeStackTop++;
-  }
-  const SEXP rho_old = *(ptrs->rho);
-
-  /* set up the new bcells and rho */
-  for (int i = 0; i < ptrs->bcells_size; ++i)
-    ptrs->bcells[i] = R_NilValue;
-
-  *(ptrs->rho) = rho;
 
   /* save current globals */
   struct bcEval_globals globals;
   save_bcEval_globals(&globals);
+
+  /* allocate memory for locals - use VLA */
+  SEXP _buffer[sizeof(struct rcpEval_locals) + ptrs->bcells_size * sizeof(SEXP)];
+  struct rcpEval_locals *locals = (struct rcpEval_locals *) &_buffer;
+
+  /* set up the new bcells and rho */
+  *(SEXP*)(&locals->rho) = rho;
+  for (int i = 0; i < ptrs->bcells_size; i++)
+    locals->vcache[i] = R_NilValue;
 
   /* Precallocate memory on the stack */
   R_bcstack_t* stack_base = R_BCNodeStackTop;
@@ -7546,14 +7539,16 @@ SEXP rcpEval(SEXP body, SEXP rho)
     R_BCNodeStackTop++;
   }
 
+  /* Set global variables same way as bcEval */
+  R_Srcref = R_InBCInterpreter;
+  R_BCIntActive = 1;
+  R_BCFrame = NULL;
+
   /* run the actual copy-patched code */
-  SEXP res = ptrs->eval(stack_base);
+  SEXP res = ptrs->eval(stack_base, locals);
 
   /* restore everything to previous state */
   restore_bcEval_globals(&globals);
-  *(ptrs->rho) = rho_old;
-  for (int i = ptrs->bcells_size - 1; i >= 0; --i)
-    ptrs->bcells[i] = (--R_BCNodeStackTop)->u.sxpval;
 
   return res;
 }
