@@ -7522,11 +7522,14 @@ SEXP rcpEval(SEXP body, SEXP rho)
   save_bcEval_globals(&globals);
 
   /* allocate memory for locals - use VLA */
-  SEXP _buffer[sizeof(struct rcpEval_locals) + ptrs->bcells_size * sizeof(SEXP)];
-  struct rcpEval_locals *locals = (struct rcpEval_locals *) &_buffer;
+  SEXP _buf1[sizeof(struct rcpEval_locals) + ptrs->bcells_size * sizeof(SEXP)];
+  RCNTXT _buf2[ptrs->rcntxts_size * sizeof(RCNTXT)];
+  struct rcpEval_locals *locals = (struct rcpEval_locals *) &_buf1;
 
-  /* set up the new bcells and rho */
+  /* set up locals */
   *(SEXP*)(&locals->rho) = rho;
+  *(RCNTXT**)(&locals->rcntxts) = _buf2;
+  //memset(locals->rcntxts, 0, ptrs->rcntxts_size * sizeof(RCNTXT));
   for (int i = 0; i < ptrs->bcells_size; i++)
     locals->vcache[i] = R_NilValue;
 

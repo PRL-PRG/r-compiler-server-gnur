@@ -2101,6 +2101,7 @@ typedef struct rcp_sharedmem_ptrs
 
 typedef struct rcpEval_locals {
     const SEXP rho;
+    RCNTXT* const rcntxts;
     SEXP vcache[];
 } rcpEval_locals;
 
@@ -2112,6 +2113,7 @@ typedef struct rcp_exec_ptrs
     // Sizes of required runtime structures
     int bcells_size;
     int max_stack_size;
+    int rcntxts_size;
 
     // Memory management
     void* memory_private;
