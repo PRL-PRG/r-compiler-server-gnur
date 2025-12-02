@@ -4968,6 +4968,12 @@ void R_RcpSharedFree(SEXP ptr)
         ptrs->memory_shared_low = NULL;
     }
     ptrs->memory_shared_size = 0;
+    if (ptrs->memory_functions_executable)
+    {
+        munmap(ptrs->memory_functions_executable, ptrs->memory_functions_executable_size);
+        ptrs->memory_functions_executable = NULL;
+    }
+    ptrs->memory_functions_executable_size = 0;
 
     /* free the structure itself */
     Free(ptrs);

@@ -2097,6 +2097,8 @@ typedef struct rcp_sharedmem_ptrs
     void* memory_shared_near;
     void* memory_shared_low;
     size_t memory_shared_size;
+    void* memory_functions_executable;
+    size_t memory_functions_executable_size;
 } rcp_sharedmem_ptrs;
 
 typedef struct rcpEval_locals {
