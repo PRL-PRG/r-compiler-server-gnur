@@ -211,7 +211,7 @@ typedef struct SEXPREC *SEXP;
 // - copied from Defn.h
 // ====================================================================
 
-typedef SEXP (*Rsh_closure)(SEXP, SEXP);
+typedef SEXP (*Rsh_closure)(SEXP);
 
 LibExtern SEXP Rsh_ClosureBodyTag;
 
