@@ -213,6 +213,9 @@ typedef struct SEXPREC *SEXP;
 // BEGIN RSH CHANGES
 // - copied from Defn.h
 // ====================================================================
+
+typedef SEXP (*Rsh_closure)(SEXP);
+
 LibExtern SEXP Rsh_ClosureBodyTag;
 
 #define RSH_IS_CLOSURE_BODY(e) (TYPEOF(e) == EXTPTRSXP && EXTPTR_TAG(e) == Rsh_ClosureBodyTag)
