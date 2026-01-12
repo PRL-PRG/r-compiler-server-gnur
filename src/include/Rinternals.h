@@ -211,11 +211,11 @@ typedef struct SEXPREC *SEXP;
 // - copied from Defn.h
 // ====================================================================
 
-typedef SEXP (*Rsh_closure)(SEXP);
+typedef SEXP (*Rsh_code)(SEXP, SEXP);
 
-LibExtern SEXP Rsh_ClosureBodyTag;
+LibExtern SEXP Rsh_CodeTag;
 
-#define RSH_IS_CLOSURE_BODY(e) (R_ExternalPtrTag((e)) == Rsh_ClosureBodyTag)
+#define IS_RSH_CODE(e) (R_ExternalPtrTag((e)) == Rsh_CodeTag)
 
 // ======================= USE_RINTERNALS section
 #ifdef USE_RINTERNALS

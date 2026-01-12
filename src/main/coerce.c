@@ -1650,7 +1650,7 @@ attribute_hidden SEXP do_asfunction(SEXP call, SEXP op, SEXP args, SEXP rho)
        mkCLOSXP can continue to overreact when its
        test fails (PR#1880, 7535, 7702) */
     if(isList(body) || isLanguage(body) || isSymbol(body)
-       || isExpression(body) || isVector(body) || isByteCode(body) || RSH_IS_CLOSURE_BODY(body)
+       || isExpression(body) || isVector(body) || isByteCode(body) || IS_RSH_CODE(body)
        )
 	    args =  mkCLOSXP(args, body, envir);
     else

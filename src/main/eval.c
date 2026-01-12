@@ -1163,12 +1163,13 @@ SEXP eval(SEXP e, SEXP rho)
 
     switch (TYPEOF(e)) {
     case EXTPTRSXP:
-      if (RSH_IS_CLOSURE_BODY(e)) {
+      if (IS_RSH_CODE(e)) {
         // seems like unnecesary complicated casting, but otherwise C complains
         // cf. https://stackoverflow.com/a/19487645
-        Rsh_closure fun;
+        Rsh_code fun;
         *(void **)(&fun) = R_ExternalPtrAddr(e);
-        tmp = fun(rho);
+		SEXP arg = R_ExternalPtrProtected(e);
+        tmp = fun(rho, arg);
       } else {
         tmp = e;
       }
@@ -1607,7 +1608,7 @@ static R_INLINE Rboolean R_CheckJIT(SEXP fun)
 
     SEXP body = BODY(fun);
 
-    if (R_jit_enabled > 0 && (TYPEOF(body) != EXTPTRSXP || !RSH_IS_CLOSURE_BODY(body)) && TYPEOF(body) != BCODESXP &&
+    if (R_jit_enabled > 0 && (TYPEOF(body) != EXTPTRSXP || !IS_RSH_CODE(body)) && TYPEOF(body) != BCODESXP &&
 	! R_disable_bytecode && ! NOJIT(fun)) {
 
 	if (MAYBEJIT(fun)) {
@@ -1839,7 +1840,7 @@ static R_INLINE Rboolean jit_srcref_match(SEXP cmpsrcref, SEXP srcref)
 }
  
 Rboolean Rsh_is_closure(SEXP clo) {
-  return TYPEOF(clo) == CLOSXP && TYPEOF(BODY(clo)) == EXTPTRSXP && RSH_IS_CLOSURE_BODY(BODY(clo));
+  return TYPEOF(clo) == CLOSXP && TYPEOF(BODY(clo)) == EXTPTRSXP && IS_RSH_CODE(BODY(clo));
 }
 
 
