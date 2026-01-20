@@ -1923,9 +1923,11 @@ SEXP Rf_applyClosure(SEXP, SEXP, SEXP, SEXP, SEXP, Rboolean);
 
 #define DispatchGroup Rf_DispatchGroup
 #define ddfindVar     Rf_ddfindVar
+#define ddfind        Rf_ddfind
 #define mkCLOSXP      Rf_mkCLOSXP
 
 SEXP ddfindVar(SEXP, SEXP);
+SEXP ddfind(int, SEXP);
 SEXP mkCLOSXP(SEXP, SEXP, SEXP);
 
 #define INCREMENT_LINKS(x) do {			\
