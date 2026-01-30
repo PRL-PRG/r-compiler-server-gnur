@@ -2114,6 +2114,9 @@ typedef struct rcpEval_locals {
     SEXP vcache[];
 } rcpEval_locals;
 
+/* Forward declaration for GDB JIT support */
+struct jit_code_entry;
+
 typedef struct rcp_exec_ptrs
 {
     // Executable code
@@ -2127,6 +2130,9 @@ typedef struct rcp_exec_ptrs
     // Memory management
     void* memory_private;
     size_t memory_private_size;
+
+    // GDB JIT debug info (NULL if not registered)
+    struct jit_code_entry *jit_entry;
 } rcp_exec_ptrs;
 
 
