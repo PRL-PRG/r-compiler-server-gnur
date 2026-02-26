@@ -215,7 +215,9 @@ typedef SEXP (*Rsh_closure)(SEXP, SEXP);
 
 LibExtern SEXP Rsh_ClosureBodyTag;
 
+#define RSH_IS_JIT_PTR(e) (TYPEOF(e) == EXTPTRSXP && EXTPTR_TAG(e) == Rsh_ClosureBodyTag)
 #define RSH_IS_CLOSURE_BODY(e) (R_ExternalPtrTag((e)) == Rsh_ClosureBodyTag)
+#define RSH_JIT_CONSTS(e) (VECTOR_ELT(EXTPTR_PROT(e), 0))
 
 // ======================= USE_RINTERNALS section
 #ifdef USE_RINTERNALS

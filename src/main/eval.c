@@ -5574,6 +5574,12 @@ static SEXP bytecodeExpr(SEXP e)
 	    return VECTOR_ELT(BCODE_CONSTS(e), 0);
 	else return R_NilValue;
     }
+	else if(RSH_IS_JIT_PTR(e)) {
+	SEXP consts = RSH_JIT_CONSTS(e);
+	if (LENGTH(consts) > 0)
+	    return VECTOR_ELT(consts, 0);
+	else return R_NilValue;
+	}
     else return e;
 }
 
