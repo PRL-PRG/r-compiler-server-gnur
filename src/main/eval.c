@@ -7518,13 +7518,9 @@ static R_INLINE void finish_force_promise(void)
 #if __GNUC__ < 14
 #error "Compiler does not support no_callee_saved_registers directive. Compile with GCC 14 or higher."
 #endif
-static __attribute__((noinline)) __attribute__((no_callee_saved_registers)) SEXP rcpNativeCaller(R_bcstack_t* stack, rcpEval_locals* locals, __attribute__((no_callee_saved_registers)) SEXP (*call)(R_bcstack_t* stack, rcpEval_locals* locals))
+static __attribute__((noinline)) SEXP rcpNativeCaller(R_bcstack_t* stack, rcpEval_locals* locals, __attribute__((no_callee_saved_registers)) SEXP (*call)(R_bcstack_t* stack, rcpEval_locals* locals))
 {
 	return call(stack, locals);
-}
-static __attribute__((noinline)) SEXP rcpNativeCallerHelper(R_bcstack_t* stack, rcpEval_locals* locals, __attribute__((no_callee_saved_registers)) SEXP (*call)(R_bcstack_t* stack, rcpEval_locals* locals))
-{
-	return rcpNativeCaller(stack, locals, call);
 }
 
 SEXP rcpEval(SEXP body, SEXP rho)
@@ -7565,7 +7561,7 @@ SEXP rcpEval(SEXP body, SEXP rho)
   R_BCFrame = NULL;
 
   /* run the actual copy-patched code */
-  SEXP res = rcpNativeCallerHelper(stack_base, locals, ptrs->eval);
+  SEXP res = rcpNativeCaller(stack_base, locals, ptrs->eval);
 
   /* restore everything to previous state */
   restore_bcEval_globals(&globals);
