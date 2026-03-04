@@ -2128,6 +2128,9 @@ typedef struct rcp_exec_ptrs
 
     // GDB JIT debug info (NULL if not registered)
     struct jit_code_entry *jit_entry;
+
+    // .eh_frame registered with __register_frame (or NULL)
+    void *eh_frame_data;
 } rcp_exec_ptrs;
 
 
