@@ -41,11 +41,20 @@
 extern "C" {
 #endif
 
-void*	vmaxget(void); // not remapped
+void*
+#if __GNUC__ >= 3
+__attribute__ ((__pure__))
+#endif
+vmaxget(void); // not remapped
 void	vmaxset(const void *); // not re-mapped
 
 void	R_gc(void);
-int	R_gc_running(void);
+
+int
+#if __GNUC__ >= 3
+__attribute__ ((__pure__))
+#endif
+R_gc_running(void);
 
 char*	R_alloc(R_SIZE_T, int);
 long double *R_allocLD(R_SIZE_T nelem);
