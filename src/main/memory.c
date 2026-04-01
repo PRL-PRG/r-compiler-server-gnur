@@ -118,7 +118,11 @@ static void gc_error(const char *msg)
 }
 
 /* These are used in profiling to separate out time in GC */
-attribute_hidden int R_gc_running(void) { return R_in_gc; }
+attribute_hidden int
+#if __GNUC__ >= 3
+__attribute__ ((__pure__))
+#endif
+R_gc_running(void) { return R_in_gc; }
 
 #ifdef TESTING_WRITE_BARRIER
 # define PROTECTCHECK
@@ -2309,7 +2313,11 @@ attribute_hidden void InitMemory(void)
    allocates off the heap as RAWSXP/REALSXP and maintains the stack of
    allocations through the ATTRIB pointer.  The stack pointer R_VStack
    is traced by the collector. */
-void *vmaxget(void)
+void*
+#if __GNUC__ >= 3
+__attribute__ ((__pure__))
+#endif
+vmaxget(void)
 {
     return (void *) R_VStack;
 }
