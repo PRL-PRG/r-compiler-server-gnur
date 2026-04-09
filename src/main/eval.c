@@ -7525,6 +7525,9 @@ static __attribute__((noinline)) SEXP rcpNativeCaller(R_bcstack_t* stack, rcpEva
 
 SEXP rcpEval(SEXP body, SEXP rho)
 {
+  if(TYPEOF(body) != EXTPTRSXP || EXTPTR_TAG(body) != Rsh_ClosureBodyTag || EXTPTR_PTR(body) == NULL)
+    error("Invalid body for rcpEval");
+
   rcp_exec_ptrs* ptrs = (rcp_exec_ptrs*)EXTPTR_PTR(body);
 
   /* check if we have enough free space on the stack */
