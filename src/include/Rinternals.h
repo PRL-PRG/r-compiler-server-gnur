@@ -2115,7 +2115,7 @@ struct jit_code_entry;
 typedef struct rcp_exec_ptrs
 {
     // Executable code
-     __attribute__((no_callee_saved_registers)) SEXP (*eval)(R_bcstack_t* stack, rcpEval_locals* locals);
+     __attribute__((no_callee_saved_registers)) R_bcstack_t (*eval)(R_bcstack_t* stack, rcpEval_locals* locals);
 
     // Sizes of required runtime structures
     int bcells_size;
