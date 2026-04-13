@@ -1061,7 +1061,7 @@ attribute_hidden void R_BCProtReset(R_bcstack_t *ptop)
 	    handle_eval_depth_overflow();	\
     } while (0)
 
-static void handle_eval_depth_overflow(void)
+void handle_eval_depth_overflow(void)
 {
     /* This bump of R_Expressions doesn't really work in many cases
        since jumps (e.g. from explicit return() calls or in UseMethod
@@ -2141,7 +2141,7 @@ static R_INLINE void cleanupEnvVector(SEXP v)
 #endif
 }
 
-static R_INLINE void R_CleanupEnvir(SEXP rho, SEXP val)
+R_INLINE void R_CleanupEnvir(SEXP rho, SEXP val)
 {
     if (val != rho) {
 	/* release the bindings and promises in rho if rho is no
@@ -2178,7 +2178,7 @@ static R_INLINE void R_CleanupEnvir(SEXP rho, SEXP val)
 /* this needs more work -- PUSHCALLARG_RC needed in more places */
 //#define NO_CALL_FRAME_ARGS_NR
 
-static void unpromiseArgs(SEXP pargs)
+void unpromiseArgs(SEXP pargs)
 {
     /* This assumes pargs will no longer be referenced. We could
        double check the refcounts on pargs as a sanity check. */

@@ -1991,6 +1991,12 @@ int (BNDCELL_TAG)(SEXP e);
 
 int Rf_asLogical2(SEXP x, int checking, SEXP call);
 
+void R_CleanupEnvir(SEXP rho, SEXP val);
+void unpromiseArgs(SEXP pargs);
+void handle_eval_depth_overflow(void);
+extern int R_EvalDepth;
+extern int R_Expressions;
+
 /* The byte code engine uses a typed stack. The typed stack's entries
    consist of a tag and a union. An entry can represent a standard
    SEXP value (tag = 0) or an unboxed scalar value.  For now real,
