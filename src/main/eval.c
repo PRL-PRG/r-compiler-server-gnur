@@ -201,7 +201,7 @@ static int getFilenum(const char* filename) {
    even if the line isn't complete. But this isn't possible if we rely
    on writing all line profiling files first. In addition, while on Unix
    we could use write() (not fprintf) to flush, it is not guaranteed we
-   could do this on Windows with the main thread suspended. 
+   could do this on Windows with the main thread suspended.
 
    With this size hitting the limit is fairly unlikely, but if we do then
    the output file will miss some entries. Maybe writing an overflow marker
@@ -251,7 +251,7 @@ static void pb_uint(profbuf *pb, uint64_t num)
 	pb->ptr += j;
 	pb->left -= j;
     } else
-	pb->left = 0; 
+	pb->left = 0;
 }
 
 static void pb_int(profbuf *pb, int64_t num)
@@ -293,7 +293,7 @@ static void pb_int(profbuf *pb, int64_t num)
    Not suitable for re-use. */
 static void pb_dbl(profbuf *pb, double num)
 {
-    char digits[PB_MAX_DBL_DIGITS]; 
+    char digits[PB_MAX_DBL_DIGITS];
     int i, j, negative;
 
     if (!R_FINITE(num)) {
@@ -578,9 +578,9 @@ static void doprof(int sig)  /* sig is ignored in Windows */
 	pf_int(i); /* %d */
 	pf_str(": ");
 	pf_str(R_Srcfiles[i-1]);
-	pf_str("\n"); 
+	pf_str("\n");
     }
-    
+
     if(strlen(buf)) {
 	pf_str(buf);
 	pf_str("\n");
@@ -829,7 +829,7 @@ static void R_InitProfiling(SEXP filename, int append, double dinterval,
 	   Solaris has CLOCK_PROF, in -lrt.
 	   FreeBSD only supports CLOCK_{REALTIME,MONOTONIC}
 	   Seems not to be supported at all on macOS.
-	*/ 
+	*/
 	struct itimerval itv;
 	itv.it_interval.tv_sec = interval / 1000000;
 	itv.it_interval.tv_usec =
@@ -4337,7 +4337,7 @@ static Rboolean R_chooseOpsMethod(SEXP x, SEXP y, SEXP mx, SEXP my,
 	expr = R_ParseString("base::chooseOpsMethod(x, y, mx, my, cl, rev)");
 	R_PreserveObject(expr);
     }
-    
+
     SEXP newrho = PROTECT(R_NewEnv(rho, FALSE, 0));
     defineVar(xSym, x, newrho); INCREMENT_NAMED(x);
     defineVar(ySym, y, newrho); INCREMENT_NAMED(y);
@@ -7575,7 +7575,24 @@ R_bcstack_t rcpEvalUnboxed(SEXP body, SEXP rho)
 SEXP rcpEval(SEXP body, SEXP rho)
 {
   R_bcstack_t res = rcpEvalUnboxed(body, rho);
-  return GETSTACK_PTR(&res);
+
+  switch (res.tag) {
+  case 0:
+    return res.u.sxpval;
+  case REALSXP:
+	return ScalarReal(res.u.dval);
+  case INTSXP:
+	return ScalarInteger(res.u.ival);
+  case LGLSXP:
+	return ScalarLogical(res.u.ival);
+  case RSH_ISQSXP:
+  {
+     Rsh_isqinfo_t isqinfo = res.u.isqval;
+	 return seq_int(isqinfo.n1, isqinfo.n2);
+  }
+  default:
+	__builtin_unreachable();
+  }
 }
 
 static SEXP bcEval_loop(struct bcEval_locals *);
@@ -7597,7 +7614,7 @@ SEXP bcEval(SEXP body, SEXP rho)
   struct bcEval_locals locals = bcode_setup_locals(body, rho);
   SEXP value = bcEval_loop(&locals);
   restore_bcEval_globals(&globals);
-  return value;  
+  return value;
 }
 
 static SEXP bcEval_loop(struct bcEval_locals *ploc)

@@ -2014,6 +2014,13 @@ extern int R_Expressions;
    Allocating memory on the stack is also supported; this is currently
    used for jump buffers.
 */
+
+# define RSH_ISQSXP 12
+typedef struct {
+    int n2;
+    int n1;
+} Rsh_isqinfo_t;
+
 typedef struct {
     int tag;
     int flags;
@@ -2021,6 +2028,7 @@ typedef struct {
 	int ival;
 	double dval;
 	SEXP sxpval;
+	Rsh_isqinfo_t isqval;
     } u;
 } R_bcstack_t;
 # define PARTIALSXP_MASK (~255)
