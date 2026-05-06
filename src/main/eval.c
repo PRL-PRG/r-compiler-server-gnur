@@ -7561,7 +7561,24 @@ R_bcstack_t rcpEvalUnboxed(SEXP body, SEXP rho)
 SEXP rcpEval(SEXP body, SEXP rho)
 {
   R_bcstack_t res = rcpEvalUnboxed(body, rho);
-  return GETSTACK_PTR(&res);
+
+  switch (res.tag) {
+  case 0:
+    return res.u.sxpval;
+  case REALSXP:
+	return ScalarReal(res.u.dval);
+  case INTSXP:
+	return ScalarInteger(res.u.ival);
+  case LGLSXP:
+	return ScalarLogical(res.u.ival);
+  case RSH_ISQSXP:
+  {
+     Rsh_isqinfo_t isqinfo = res.u.isqval;
+	 return seq_int(isqinfo.n1, isqinfo.n2);
+  }
+  default:
+	__builtin_unreachable();
+  }
 }
 
 static SEXP bcEval_loop(struct bcEval_locals *);
