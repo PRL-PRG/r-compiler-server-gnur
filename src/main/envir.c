@@ -875,7 +875,7 @@ attribute_hidden void unbindVar(SEXP symbol, SEXP rho)
   Callers set *canCache = TRUE or NULL
 */
 
-static SEXP findVarLocInFrame(SEXP rho, SEXP symbol, Rboolean *canCache)
+SEXP findVarLocInFrame(SEXP rho, SEXP symbol, Rboolean *canCache)
 {
     int hashcode;
     SEXP frame, c;
@@ -1255,7 +1255,7 @@ SEXP findVar(SEXP symbol, SEXP rho)
     return R_findVar(symbol, rho);
 }
 
-static SEXP findVarLoc(SEXP symbol, SEXP rho)
+SEXP findVarLoc(SEXP symbol, SEXP rho)
 {
     SEXP vl;
 
@@ -4632,4 +4632,3 @@ attribute_hidden void findFunctionForBody(SEXP body) {
 	}
     }
 }
-
