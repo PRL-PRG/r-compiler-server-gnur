@@ -946,7 +946,6 @@ R_varloc_t R_findVarLocInFrame(SEXP rho, SEXP symbol)
     return val;
 }
 
-attribute_hidden
 SEXP R_GetVarLocValue(R_varloc_t vl)
 {
     SEXP cell = vl.cell;
