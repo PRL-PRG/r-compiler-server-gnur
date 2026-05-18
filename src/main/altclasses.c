@@ -2034,7 +2034,7 @@ attribute_hidden SEXP do_tryWrap(SEXP call, SEXP op, SEXP args, SEXP env)
    operation. It could be used in other places, but extreme caution is
    needed to make sure there is no possibility that the wrapper object
    will be referenced from C code after it is cleared. */
-attribute_hidden SEXP R_tryUnwrap(SEXP x)
+SEXP R_tryUnwrap(SEXP x)
 {
     if (! MAYBE_SHARED(x) && is_wrapper(x) &&
 	WRAPPER_SORTED(x) == UNKNOWN_SORTEDNESS && ! WRAPPER_NO_NA(x)) {
