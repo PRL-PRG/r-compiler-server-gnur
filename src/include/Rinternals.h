@@ -2123,13 +2123,22 @@ typedef struct rcpEval_locals {
     SEXP vcache[];
 } rcpEval_locals;
 
+/* RCP private calling convention: stack and locals are passed in these
+   callee-saved x86-64 GPRs (under the standard SysV ABI), so runtime
+   helpers called from JIT code preserve them across calls. The JIT chain
+   itself uses no_callee_saved_registers, so the entry trampoline saves
+   them on behalf of the surrounding C code. */
+#define RSH_RCP_REGISTER_STACK  "rbx"
+#define RSH_RCP_REGISTER_LOCALS "r14"
+
 /* Forward declaration for GDB JIT support */
 struct jit_code_entry;
 
 typedef struct rcp_exec_ptrs
 {
-    // Executable code
-     __attribute__((no_callee_saved_registers)) R_bcstack_t (*eval)(R_bcstack_t* stack, rcpEval_locals* locals);
+    // Executable code -- stack and locals are passed in the pinned registers
+    // above, not as ABI arguments.
+     __attribute__((no_callee_saved_registers)) R_bcstack_t (*eval)(void);
 
     // Sizes of required runtime structures
     int bcells_size;

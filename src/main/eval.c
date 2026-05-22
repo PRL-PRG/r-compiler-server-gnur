@@ -7518,9 +7518,13 @@ static R_INLINE void finish_force_promise(void)
 #if __GNUC__ < 14
 #error "Compiler does not support no_callee_saved_registers directive. Compile with GCC 14 or higher."
 #endif
-static __attribute__((noinline)) R_bcstack_t rcpNativeCaller(R_bcstack_t* stack, rcpEval_locals* locals, __attribute__((no_callee_saved_registers)) R_bcstack_t (*call)(R_bcstack_t* stack, rcpEval_locals* locals))
+static __attribute__((noinline)) R_bcstack_t rcpNativeCaller(R_bcstack_t* stack, rcpEval_locals* locals, __attribute__((no_callee_saved_registers)) R_bcstack_t (*call)(void))
 {
-	return call(stack, locals);
+	register R_bcstack_t* stack_reg __asm__(RSH_RCP_REGISTER_STACK) = stack;
+	asm volatile("" : : "r"(stack_reg));
+	register rcpEval_locals* locals_reg __asm__(RSH_RCP_REGISTER_LOCALS) = locals;
+	asm volatile("" : : "r"(locals_reg));
+	return call();
 }
 
 R_bcstack_t rcpEvalUnboxed(SEXP body, SEXP rho)
