@@ -5590,7 +5590,18 @@ SEXP R_BytecodeExpr(SEXP e)
 
 SEXP R_PromiseExpr(SEXP p)
 {
-    return bytecodeExpr(PRCODE(p));
+    SEXP code = PRCODE(p);
+    /* For compiled promise bodies (rcp JIT), return the compiled code
+       directly. This ensures that functions like delayedAssign() that
+       use substitute() to extract a promise's expression will receive
+       the compiled EXTPTRSXP, so that when the resulting lazy binding
+       is forced it goes through rcpEval (preserving coverage stencils
+       and native performance) rather than the AST interpreter.
+       R_ClosureExpr is intentionally left using bytecodeExpr so that
+       body(f) still returns the human-readable source expression. */
+    if (RSH_IS_JIT_PTR(code))
+	return code;
+    return bytecodeExpr(code);
 }
 
 SEXP R_ClosureExpr(SEXP p)
