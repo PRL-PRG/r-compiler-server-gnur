@@ -2784,8 +2784,18 @@ SEXP substitute(SEXP lang, SEXP rho)
 {
     SEXP t;
     switch (TYPEOF(lang)) {
-    case PROMSXP:
-	return substitute(PREXPR(lang), rho);
+    case PROMSXP: {
+	SEXP expr = PREXPR(lang);
+	/* For RCP JIT-compiled promise bodies, R_PromiseExpr returns the
+	   compiled EXTPTRSXP rather than the original source expression.
+	   Unwrap it here so that substitute() returns meaningful R code
+	   (e.g. the symbol `u`) instead of the opaque compiled object.
+	   This is needed for cbind/rbind column/row name derivation from
+	   unevaluated `...` args when promise bodies are JIT-compiled. */
+	if (RSH_IS_JIT_PTR(expr))
+	    expr = VECTOR_ELT(RSH_JIT_CONSTS(expr), 0);
+	return substitute(expr, rho);
+    }
     case SYMSXP:
 	if (rho != R_NilValue) {
 	    t = R_findVarInFrame( rho, lang);
@@ -2794,6 +2804,11 @@ SEXP substitute(SEXP lang, SEXP rho)
 		    do {
 			t = PREXPR(t);
 		    } while(TYPEOF(t) == PROMSXP);
+		    /* For RCP JIT-compiled promise bodies, R_PromiseExpr returns
+		       the compiled EXTPTRSXP. Unwrap it to the original source
+		       expression so substitute() returns meaningful R code. */
+		    if (RSH_IS_JIT_PTR(t))
+			t = VECTOR_ELT(RSH_JIT_CONSTS(t), 0);
 		    /* make sure code will not be modified: */
 		    ENSURE_NAMEDMAX(t);
 		    return t;
