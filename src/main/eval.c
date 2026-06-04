@@ -5588,18 +5588,21 @@ SEXP R_BytecodeExpr(SEXP e)
 
 SEXP R_PromiseExpr(SEXP p)
 {
-    SEXP code = PRCODE(p);
-    /* For compiled promise bodies (rcp JIT), return the compiled code
-       directly. This ensures that functions like delayedAssign() that
-       use substitute() to extract a promise's expression will receive
-       the compiled EXTPTRSXP, so that when the resulting lazy binding
-       is forced it goes through rcpEval (preserving coverage stencils
-       and native performance) rather than the AST interpreter.
-       R_ClosureExpr is intentionally left using bytecodeExpr so that
-       body(f) still returns the human-readable source expression. */
-    if (RSH_IS_JIT_PTR(code))
-	return code;
-    return bytecodeExpr(code);
+    /* PREXPR()/R_PromiseExpr() is the canonical accessor for a promise's
+       unevaluated *expression* (a language object). Non-standard evaluation
+       throughout base R and packages (substitute(), match.arg(), and rlang's
+       quasiquotation / list2() splice detection) relies on getting the source
+       expression back, never the opaque code object.
+
+       For rcp JIT-compiled promise bodies PRCODE(p) is an EXTPTRSXP wrapping
+       native code; bytecodeExpr() unwraps it to the original source
+       expression stored in the constant pool (consts[0]), exactly as it does
+       for ordinary BCODESXP bodies. Returning the EXTPTRSXP directly here
+       broke any consumer that inspects the expression -- e.g. rlang::list2()
+       could no longer see the `!!!` splice operator and force-evaluated the
+       promise, turning `!!!dots` into a literal triple negation and failing
+       with "invalid argument type". */
+    return bytecodeExpr(PRCODE(p));
 }
 
 SEXP R_ClosureExpr(SEXP p)
