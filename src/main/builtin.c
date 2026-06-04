@@ -96,6 +96,25 @@ attribute_hidden SEXP do_delayed(SEXP call, SEXP op, SEXP args, SEXP rho)
     if (!isEnvironment(aenv))
 	error(_("invalid '%s' argument"), "assign.env");
 
+    /* `expr` came from substitute(value) in the R-level delayedAssign wrapper,
+       which yields the *source* expression. If `value` was an rcp JIT-compiled
+       promise, that discards the native body, so forcing the delayed binding
+       would fall back to the AST interpreter -- losing native execution and,
+       importantly, any coverage instrumentation baked into the compiled body.
+       Recover the compiled body from the still-unforced `value` promise (bound
+       in rho, which is the delayedAssign frame) and use it as the new promise's
+       code so the rcp code path actually runs when the binding is forced. This
+       is delayedAssign-specific and does not affect substitute()'s general
+       (NSE) behaviour, which must keep returning the source expression. */
+    {
+	static SEXP value_sym = NULL;
+	if (value_sym == NULL) value_sym = install("value");
+	SEXP valprom = R_findVarInFrame(rho, value_sym);
+	if (TYPEOF(valprom) == PROMSXP && !PROMISE_IS_EVALUATED(valprom)
+	    && RSH_IS_JIT_PTR(PRCODE(valprom)))
+	    expr = PRCODE(valprom);
+    }
+
     defineVar(name, mkPROMISE(expr, eenv), aenv);
     return R_NilValue;
 }
