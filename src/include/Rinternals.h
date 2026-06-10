@@ -210,14 +210,12 @@ typedef struct SEXPREC *SEXP;
 // BEGIN RSH CHANGES
 // - copied from Defn.h
 // ====================================================================
-
-typedef SEXP (*Rsh_closure)(SEXP, SEXP);
-
 LibExtern SEXP Rsh_ClosureBodyTag;
 
 #define RSH_IS_JIT_PTR(e) (TYPEOF(e) == EXTPTRSXP && EXTPTR_TAG(e) == Rsh_ClosureBodyTag)
-#define RSH_IS_CLOSURE_BODY(e) (R_ExternalPtrTag((e)) == Rsh_ClosureBodyTag)
+#define RSH_IS_CLOSURE_BODY(e) RSH_IS_JIT_PTR(e)
 #define RSH_JIT_CONSTS(e) (VECTOR_ELT(EXTPTR_PROT(e), 0))
+#define RSH_JIT_PTR(e) (EXTPTR_PTR(e))
 
 // ======================= USE_RINTERNALS section
 #ifdef USE_RINTERNALS
@@ -2104,6 +2102,19 @@ enum {
     CTXT_UNWIND   = 128
 };
 
+SEXP rshEval(SEXP body, SEXP rho);
+
+#ifdef RCP
+typedef R_bcstack_t (*Rsh_closure)(void);
+R_bcstack_t rcpEvalUnboxed(SEXP body, SEXP rho);
+#define rshEvalUnboxed rcpEvalUnboxed
+#else
+typedef R_bcstack_t (*Rsh_closure)(SEXP, SEXP);
+R_bcstack_t bc2cEvalUnboxed(SEXP body, SEXP rho);
+#define rshEvalUnboxed bc2cEvalUnboxed
+#endif
+
+#ifdef RCP
 // ====================================================================
 // RPC (copy-and-patch)
 // ====================================================================
@@ -2159,6 +2170,7 @@ typedef struct rcp_exec_ptrs
 
 void R_RcpSharedFree(SEXP);
 void R_RcpFree(SEXP);
+#endif /* RCP */
 
 // ====================================================================
 // END RSH CHANGES

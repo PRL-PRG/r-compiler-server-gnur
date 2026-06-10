@@ -1802,17 +1802,17 @@ static SEXP ReadItem_Iterative(int flags, SEXP ref_table, R_inpstream_t stream)
     /* Building dotted pair objects with recursion on the CDR will
        overflow the PROTECT stack for long lists. Instead we build
        pairlists in an iterative loop */
-    
+
     SEXPTYPE type = DECODE_TYPE(flags);
     SEXP s, sfirst = NULL, slast = NULL;
-    
+
     /* An assertion here guarantees that we go through the loop at
        least once. This make for cleaner exit code and avoids a
        potential infinite loop: ReadItem_Recursive <->
        ReadIterm_iterative */
     R_assert(type == LISTSXP || type == LANGSXP || type == CLOSXP ||
 	     type == PROMSXP || type == DOTSXP);
-    
+
     while (type == LISTSXP || type == LANGSXP || type == CLOSXP ||
 	   type == PROMSXP || type == DOTSXP) {
 	int levs, objf, hasattr, hastag;

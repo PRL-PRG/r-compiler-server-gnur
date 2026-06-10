@@ -32,7 +32,7 @@
 #include <errno.h>
 #include <math.h>
 
-SEXP rcpEval(SEXP, SEXP);
+SEXP rshEval(SEXP, SEXP);
 SEXP bcEval(SEXP, SEXP);
 static void bcEval_init(void);
 
@@ -1165,7 +1165,7 @@ SEXP eval(SEXP e, SEXP rho)
     switch (TYPEOF(e)) {
     case EXTPTRSXP:
       if (RSH_IS_CLOSURE_BODY(e)) {
-        tmp = rcpEval(e, rho);
+        tmp = rshEval(e, rho);
       } else {
         tmp = e;
       }
@@ -1835,6 +1835,10 @@ static R_INLINE Rboolean jit_srcref_match(SEXP cmpsrcref, SEXP srcref)
     return R_compute_identical(cmpsrcref, srcref, 0);
 }
 
+Rboolean Rsh_is_closure(SEXP clo) {
+  return TYPEOF(clo) == CLOSXP && RSH_IS_CLOSURE_BODY(BODY(clo));
+}
+
 attribute_hidden SEXP R_cmpfun1(SEXP fun)
 {
     int old_visible = R_Visible;
@@ -1846,7 +1850,7 @@ attribute_hidden SEXP R_cmpfun1(SEXP fun)
     PROTECT(fcall = lang3(R_TripleColonSymbol, packsym, funsym));
     PROTECT(call = lang2(fcall, fun));
     PROTECT(val = eval(call, R_GlobalEnv));
-    if (TYPEOF(BODY(val)) != BCODESXP && TYPEOF(BODY(val)) != EXTPTRSXP)
+    if (!Rsh_is_closure(val) && TYPEOF(BODY(val)) != BCODESXP)
 	/* Compilation may have failed because R allocator could not malloc
 	   memory to extend the R heap, so we run GC to release some pages.
 	   This problem has been observed while byte-compiling packages on
@@ -1912,7 +1916,7 @@ static void R_cmpfun(SEXP fun)
 
     SEXP val = R_cmpfun1(fun);
 
-    if (TYPEOF(BODY(val)) != BCODESXP && TYPEOF(BODY(val)) != EXTPTRSXP)
+    if (!Rsh_is_closure(val) && TYPEOF(BODY(val)) != BCODESXP)
 	SET_NOJIT(fun);
     else {
 	if (jit_strategy != STRATEGY_NO_CACHE)
@@ -7527,6 +7531,7 @@ static R_INLINE void finish_force_promise(void)
      ! RSTEP(fun) && ! RDEBUG(rho) &&				\
      R_GlobalContext->callflag != CTXT_GENERIC)
 
+#ifdef RCP
 #if __GNUC__ < 14
 #error "Compiler does not support no_callee_saved_registers directive. Compile with GCC 14 or higher."
 #endif
@@ -7541,10 +7546,10 @@ static __attribute__((noinline)) R_bcstack_t rcpNativeCaller(R_bcstack_t* stack,
 
 R_bcstack_t rcpEvalUnboxed(SEXP body, SEXP rho)
 {
-  if(TYPEOF(body) != EXTPTRSXP || EXTPTR_TAG(body) != Rsh_ClosureBodyTag || EXTPTR_PTR(body) == NULL)
+  if(!RSH_IS_JIT_PTR(body) || EXTPTR_PTR(body) == NULL)
     error("Invalid body for rcpEval");
 
-  rcp_exec_ptrs* ptrs = (rcp_exec_ptrs*)EXTPTR_PTR(body);
+  rcp_exec_ptrs* ptrs = (rcp_exec_ptrs*)RSH_JIT_PTR(body);
 
   /* check if we have enough free space on the stack */
   if (R_BCNodeStackTop + ptrs->max_stack_size > R_BCNodeStackEnd)
@@ -7587,10 +7592,27 @@ R_bcstack_t rcpEvalUnboxed(SEXP body, SEXP rho)
 
   return res;
 }
-
-SEXP rcpEval(SEXP body, SEXP rho)
+#define rshEvalUnboxed rcpEvalUnboxed
+#else
+R_bcstack_t bc2cEvalUnboxed(SEXP body, SEXP rho)
 {
-  R_bcstack_t res = rcpEvalUnboxed(body, rho);
+    SEXP c_cp = RSH_JIT_CONSTS(body);
+    if (TYPEOF(c_cp) != VECSXP) {
+      Rf_error("Expected a vector, got: %d", TYPEOF(c_cp));
+    }
+
+    // seems like unnecesary complicated casting, but otherwise C complains
+    // cf. https://stackoverflow.com/a/19487645
+    Rsh_closure fun;
+    *(void **)(&fun) = RSH_JIT_PTR(body);
+    return fun(rho, c_cp);
+}
+#define rshEvalUnboxed bc2cEvalUnboxed
+#endif /* RCP */
+
+SEXP rshEval(SEXP body, SEXP rho)
+{
+  R_bcstack_t res = rshEvalUnboxed(body, rho);
 
   switch (res.tag) {
   case 0:
