@@ -1835,6 +1835,11 @@ static R_INLINE Rboolean jit_srcref_match(SEXP cmpsrcref, SEXP srcref)
     return R_compute_identical(cmpsrcref, srcref, 0);
 }
 
+Rboolean Rsh_is_closure(SEXP clo) {
+  return TYPEOF(clo) == CLOSXP && TYPEOF(BODY(clo)) == EXTPTRSXP && RSH_IS_CLOSURE_BODY(BODY(clo));
+}
+
+
 attribute_hidden SEXP R_cmpfun1(SEXP fun)
 {
     int old_visible = R_Visible;
@@ -1846,7 +1851,11 @@ attribute_hidden SEXP R_cmpfun1(SEXP fun)
     PROTECT(fcall = lang3(R_TripleColonSymbol, packsym, funsym));
     PROTECT(call = lang2(fcall, fun));
     PROTECT(val = eval(call, R_GlobalEnv));
+<<<<<<< HEAD
     if (!RSH_IS_CLOSURE(val) && TYPEOF(BODY(val)) != BCODESXP))
+=======
+    if (!Rsh_is_closure(val) && TYPEOF(BODY(val)) != BCODESXP)
+>>>>>>> RSH-4-3-2
 	/* Compilation may have failed because R allocator could not malloc
 	   memory to extend the R heap, so we run GC to release some pages.
 	   This problem has been observed while byte-compiling packages on
