@@ -76,7 +76,9 @@
 # include "valgrind/memcheck.h"
 #endif
 
+#ifdef RCP
 #include <sys/mman.h>
+#endif
 
 /* For speed in cases when the argument is known to not be an ALTREP list. */
 #define VECTOR_ELT_0(x,i)        ((SEXP *) STDVEC_DATAPTR(x))[i]
@@ -4976,6 +4978,7 @@ attribute_hidden void R_FreeStringBufferL(R_StringBuffer *buf)
     }
 }
 
+#ifdef RCP
 void R_RcpSharedFree(SEXP ptr)
 {
     rcp_sharedmem_ptrs* ptrs = R_ExternalPtrAddr(ptr);
@@ -5023,6 +5026,7 @@ void R_RcpFree(SEXP ptr)
         EXTPTR_PTR(ptr) = NULL;
     }
 }
+#endif /* RCP */
 
 
 /* ======== This needs direct access to gp field for efficiency ======== */
