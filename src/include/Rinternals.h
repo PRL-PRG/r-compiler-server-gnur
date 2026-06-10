@@ -213,6 +213,7 @@ typedef struct SEXPREC *SEXP;
 LibExtern SEXP Rsh_ClosureBodyTag;
 
 #define RSH_IS_JIT_PTR(e) (TYPEOF(e) == EXTPTRSXP && EXTPTR_TAG(e) == Rsh_ClosureBodyTag)
+#define RSH_IS_CLOSURE(clo) (TYPEOF(clo) == CLOSXP && RSH_IS_CLOSURE_BODY(BODY(clo))
 #define RSH_IS_CLOSURE_BODY(e) RSH_IS_JIT_PTR(e)
 #define RSH_JIT_CONSTS(e) (VECTOR_ELT(EXTPTR_PROT(e), 0))
 #define RSH_JIT_PTR(e) (EXTPTR_PTR(e))
@@ -2116,7 +2117,7 @@ R_bcstack_t bc2cEvalUnboxed(SEXP body, SEXP rho);
 
 #ifdef RCP
 // ====================================================================
-// RPC (copy-and-patch)
+// RCP (copy-and-patch)
 // ====================================================================
 
 typedef struct rcp_sharedmem_ptrs
@@ -2128,11 +2129,25 @@ typedef struct rcp_sharedmem_ptrs
     size_t memory_functions_executable_size;
 } rcp_sharedmem_ptrs;
 
+/* rho and the rcntxts pointer are initialised once by rcpEvalUnboxed() in
+   eval.c and only read afterwards by the JIT'd stencil code. Mark them const
+   in the stencil translation unit (which defines COMPILING_STENCILS) so the
+   copy-and-patch code treats them as immutable; leave them writable everywhere
+   else so eval.c can assign them during setup. const is only a qualifier, so
+   the struct layout is identical across translation units. */
+#ifdef COMPILING_STENCILS
+# define RCP_LOCALS_RO const
+#else
+# define RCP_LOCALS_RO
+#endif
+
 typedef struct rcpEval_locals {
-    const SEXP rho;
-    RCNTXT* const rcntxts;
+    RCP_LOCALS_RO SEXP rho;
+    RCNTXT *RCP_LOCALS_RO rcntxts;
     SEXP vcache[];
 } rcpEval_locals;
+
+#undef RCP_LOCALS_RO
 
 /* RCP private calling convention: stack and locals are passed in these
    callee-saved x86-64 GPRs (under the standard SysV ABI), so runtime

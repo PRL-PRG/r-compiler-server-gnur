@@ -440,7 +440,7 @@ attribute_hidden Rboolean R_SetMaxVSize(R_size_t size)
 	    R_MaxVSize = size;
 	    return TRUE;
 	}
-    } else 
+    } else
 	if (size / vsfac >= R_VSize) {
 	    R_MaxVSize = (size + 1) / vsfac;
 	    return TRUE;
@@ -498,7 +498,7 @@ attribute_hidden SEXP do_maxNSize(SEXP call, SEXP op, SEXP args, SEXP rho)
 	if (newval == R_PosInf)
 	    R_MaxNSize = R_SIZE_T_MAX;
 	else {
-	    if (newval >= (double) R_SIZE_T_MAX) 
+	    if (newval >= (double) R_SIZE_T_MAX)
 		R_MaxNSize = R_SIZE_T_MAX;
 	    else if (!R_SetMaxNSize((R_size_t) newval))
 		warning(_("a limit lower than current usage, so ignored"));
@@ -4995,7 +4995,7 @@ void R_RcpSharedFree(SEXP ptr)
 void R_RcpFree(SEXP ptr)
 {
     if(!RSH_IS_CLOSURE_BODY(ptr))
-	error("Attemted to free a non-rcp pointer");
+	error("Attempted to free a non-rcp pointer");
 
     rcp_exec_ptrs* ptrs = (rcp_exec_ptrs*)EXTPTR_PTR(ptr);
     if(ptrs)

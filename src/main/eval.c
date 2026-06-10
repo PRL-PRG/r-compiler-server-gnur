@@ -1835,10 +1835,6 @@ static R_INLINE Rboolean jit_srcref_match(SEXP cmpsrcref, SEXP srcref)
     return R_compute_identical(cmpsrcref, srcref, 0);
 }
 
-Rboolean Rsh_is_closure(SEXP clo) {
-  return TYPEOF(clo) == CLOSXP && RSH_IS_CLOSURE_BODY(BODY(clo));
-}
-
 attribute_hidden SEXP R_cmpfun1(SEXP fun)
 {
     int old_visible = R_Visible;
@@ -1850,7 +1846,7 @@ attribute_hidden SEXP R_cmpfun1(SEXP fun)
     PROTECT(fcall = lang3(R_TripleColonSymbol, packsym, funsym));
     PROTECT(call = lang2(fcall, fun));
     PROTECT(val = eval(call, R_GlobalEnv));
-    if (!Rsh_is_closure(val) && TYPEOF(BODY(val)) != BCODESXP)
+    if (!RSH_IS_CLOSURE(val) && TYPEOF(BODY(val)) != BCODESXP))
 	/* Compilation may have failed because R allocator could not malloc
 	   memory to extend the R heap, so we run GC to release some pages.
 	   This problem has been observed while byte-compiling packages on
@@ -1916,7 +1912,7 @@ static void R_cmpfun(SEXP fun)
 
     SEXP val = R_cmpfun1(fun);
 
-    if (!Rsh_is_closure(val) && TYPEOF(BODY(val)) != BCODESXP)
+    if (!RSH_IS_CLOSURE(val) && TYPEOF(BODY(val)) != BCODESXP))
 	SET_NOJIT(fun);
     else {
 	if (jit_strategy != STRATEGY_NO_CACHE)
@@ -7564,8 +7560,8 @@ R_bcstack_t rcpEvalUnboxed(SEXP body, SEXP rho)
   RCNTXT rcntxts[ptrs->rcntxts_size];
 
   /* set up locals */
-  *(SEXP*)(&locals->rho) = rho;
-  *(RCNTXT**)(&locals->rcntxts) = rcntxts;
+  locals->rho = rho;
+  locals->rcntxts = rcntxts;
   //memset(locals->rcntxts, 0, ptrs->rcntxts_size * sizeof(RCNTXT));
   for (int i = 0; i < ptrs->bcells_size; i++)
     locals->vcache[i] = R_NilValue;
@@ -7596,10 +7592,12 @@ R_bcstack_t rcpEvalUnboxed(SEXP body, SEXP rho)
 #else
 R_bcstack_t bc2cEvalUnboxed(SEXP body, SEXP rho)
 {
+    if (!RSH_IS_JIT_PTR(body) || RSH_JIT_PTR(body) == NULL)
+      Rf_error("Invalid body for rshEval");
+    SEXP prot = EXTPTR_PROT(body);
+    if (TYPEOF(prot) != VECSXP || LENGTH(prot) < 1)
+      Rf_error("Invalid JIT pointer: missing constant pool");
     SEXP c_cp = RSH_JIT_CONSTS(body);
-    if (TYPEOF(c_cp) != VECSXP) {
-      Rf_error("Expected a vector, got: %d", TYPEOF(c_cp));
-    }
 
     // seems like unnecesary complicated casting, but otherwise C complains
     // cf. https://stackoverflow.com/a/19487645
