@@ -32,6 +32,7 @@
 #include <errno.h>
 #include <math.h>
 
+SEXP rshEval(SEXP, SEXP);
 SEXP bcEval(SEXP, SEXP);
 static void bcEval_init(void);
 
@@ -200,7 +201,7 @@ static int getFilenum(const char* filename) {
    even if the line isn't complete. But this isn't possible if we rely
    on writing all line profiling files first. In addition, while on Unix
    we could use write() (not fprintf) to flush, it is not guaranteed we
-   could do this on Windows with the main thread suspended. 
+   could do this on Windows with the main thread suspended.
 
    With this size hitting the limit is fairly unlikely, but if we do then
    the output file will miss some entries. Maybe writing an overflow marker
@@ -250,7 +251,7 @@ static void pb_uint(profbuf *pb, uint64_t num)
 	pb->ptr += j;
 	pb->left -= j;
     } else
-	pb->left = 0; 
+	pb->left = 0;
 }
 
 static void pb_int(profbuf *pb, int64_t num)
@@ -292,7 +293,7 @@ static void pb_int(profbuf *pb, int64_t num)
    Not suitable for re-use. */
 static void pb_dbl(profbuf *pb, double num)
 {
-    char digits[PB_MAX_DBL_DIGITS]; 
+    char digits[PB_MAX_DBL_DIGITS];
     int i, j, negative;
 
     if (!R_FINITE(num)) {
@@ -577,9 +578,9 @@ static void doprof(int sig)  /* sig is ignored in Windows */
 	pf_int(i); /* %d */
 	pf_str(": ");
 	pf_str(R_Srcfiles[i-1]);
-	pf_str("\n"); 
+	pf_str("\n");
     }
-    
+
     if(strlen(buf)) {
 	pf_str(buf);
 	pf_str("\n");
@@ -828,7 +829,7 @@ static void R_InitProfiling(SEXP filename, int append, double dinterval,
 	   Solaris has CLOCK_PROF, in -lrt.
 	   FreeBSD only supports CLOCK_{REALTIME,MONOTONIC}
 	   Seems not to be supported at all on macOS.
-	*/ 
+	*/
 	struct itimerval itv;
 	itv.it_interval.tv_sec = interval / 1000000;
 	itv.it_interval.tv_usec =
@@ -1060,7 +1061,7 @@ attribute_hidden void R_BCProtReset(R_bcstack_t *ptop)
 	    handle_eval_depth_overflow();	\
     } while (0)
 
-static void handle_eval_depth_overflow(void)
+void handle_eval_depth_overflow(void)
 {
     /* This bump of R_Expressions doesn't really work in many cases
        since jumps (e.g. from explicit return() calls or in UseMethod
@@ -1164,16 +1165,7 @@ SEXP eval(SEXP e, SEXP rho)
     switch (TYPEOF(e)) {
     case EXTPTRSXP:
       if (RSH_IS_CLOSURE_BODY(e)) {
-        SEXP c_cp = R_ExternalPtrProtected(e);
-        if (TYPEOF(c_cp) != VECSXP) {
-          Rf_error("Expected a vector, got: %d", TYPEOF(c_cp));
-        }
-
-        // seems like unnecesary complicated casting, but otherwise C complains
-        // cf. https://stackoverflow.com/a/19487645
-        Rsh_closure fun;
-        *(void **)(&fun) = R_ExternalPtrAddr(e);
-        tmp = fun(rho, c_cp);
+        tmp = rshEval(e, rho);
       } else {
         tmp = e;
       }
@@ -1842,7 +1834,7 @@ static R_INLINE Rboolean jit_srcref_match(SEXP cmpsrcref, SEXP srcref)
 {
     return R_compute_identical(cmpsrcref, srcref, 0);
 }
- 
+
 Rboolean Rsh_is_closure(SEXP clo) {
   return TYPEOF(clo) == CLOSXP && TYPEOF(BODY(clo)) == EXTPTRSXP && RSH_IS_CLOSURE_BODY(BODY(clo));
 }
@@ -1859,7 +1851,7 @@ attribute_hidden SEXP R_cmpfun1(SEXP fun)
     PROTECT(fcall = lang3(R_TripleColonSymbol, packsym, funsym));
     PROTECT(call = lang2(fcall, fun));
     PROTECT(val = eval(call, R_GlobalEnv));
-    if (!Rsh_is_closure(val) && TYPEOF(BODY(val)) != BCODESXP)
+    if (!RSH_IS_CLOSURE(val) && TYPEOF(BODY(val)) != BCODESXP))
 	/* Compilation may have failed because R allocator could not malloc
 	   memory to extend the R heap, so we run GC to release some pages.
 	   This problem has been observed while byte-compiling packages on
@@ -1925,7 +1917,7 @@ static void R_cmpfun(SEXP fun)
 
     SEXP val = R_cmpfun1(fun);
 
-    if (!Rsh_is_closure(val) && TYPEOF(BODY(val)) != BCODESXP)
+    if (!RSH_IS_CLOSURE(val) && TYPEOF(BODY(val)) != BCODESXP))
 	SET_NOJIT(fun);
     else {
 	if (jit_strategy != STRATEGY_NO_CACHE)
@@ -2154,7 +2146,7 @@ static R_INLINE void cleanupEnvVector(SEXP v)
 #endif
 }
 
-static R_INLINE void R_CleanupEnvir(SEXP rho, SEXP val)
+R_INLINE void R_CleanupEnvir(SEXP rho, SEXP val)
 {
     if (val != rho) {
 	/* release the bindings and promises in rho if rho is no
@@ -2191,7 +2183,7 @@ static R_INLINE void R_CleanupEnvir(SEXP rho, SEXP val)
 /* this needs more work -- PUSHCALLARG_RC needed in more places */
 //#define NO_CALL_FRAME_ARGS_NR
 
-static void unpromiseArgs(SEXP pargs)
+void unpromiseArgs(SEXP pargs)
 {
     /* This assumes pargs will no longer be referenced. We could
        double check the refcounts on pargs as a sanity check. */
@@ -4350,7 +4342,7 @@ static Rboolean R_chooseOpsMethod(SEXP x, SEXP y, SEXP mx, SEXP my,
 	expr = R_ParseString("base::chooseOpsMethod(x, y, mx, my, cl, rev)");
 	R_PreserveObject(expr);
     }
-    
+
     SEXP newrho = PROTECT(R_NewEnv(rho, FALSE, 0));
     defineVar(xSym, x, newrho); INCREMENT_NAMED(x);
     defineVar(ySym, y, newrho); INCREMENT_NAMED(y);
@@ -5587,6 +5579,10 @@ static SEXP bytecodeExpr(SEXP e)
 	    return VECTOR_ELT(BCODE_CONSTS(e), 0);
 	else return R_NilValue;
     }
+	else if(RSH_IS_JIT_PTR(e)) {
+	SEXP consts = RSH_JIT_CONSTS(e);
+	return VECTOR_ELT(consts, 0);
+	}
     else return e;
 }
 
@@ -5597,6 +5593,20 @@ SEXP R_BytecodeExpr(SEXP e)
 
 SEXP R_PromiseExpr(SEXP p)
 {
+    /* PREXPR()/R_PromiseExpr() is the canonical accessor for a promise's
+       unevaluated *expression* (a language object). Non-standard evaluation
+       throughout base R and packages (substitute(), match.arg(), and rlang's
+       quasiquotation / list2() splice detection) relies on getting the source
+       expression back, never the opaque code object.
+
+       For rcp JIT-compiled promise bodies PRCODE(p) is an EXTPTRSXP wrapping
+       native code; bytecodeExpr() unwraps it to the original source
+       expression stored in the constant pool (consts[0]), exactly as it does
+       for ordinary BCODESXP bodies. Returning the EXTPTRSXP directly here
+       broke any consumer that inspects the expression -- e.g. rlang::list2()
+       could no longer see the `!!!` splice operator and force-evaluated the
+       promise, turning `!!!dots` into a literal triple negation and failing
+       with "invalid argument type". */
     return bytecodeExpr(PRCODE(p));
 }
 
@@ -7522,6 +7532,110 @@ static R_INLINE void finish_force_promise(void)
      ! RSTEP(fun) && ! RDEBUG(rho) &&				\
      R_GlobalContext->callflag != CTXT_GENERIC)
 
+#ifdef RCP
+#if __GNUC__ < 14
+#error "Compiler does not support no_callee_saved_registers directive. Compile with GCC 14 or higher."
+#endif
+static __attribute__((noinline)) R_bcstack_t rcpNativeCaller(R_bcstack_t* stack, rcpEval_locals* locals, __attribute__((no_callee_saved_registers)) R_bcstack_t (*call)(void))
+{
+	register R_bcstack_t* stack_reg __asm__(RSH_RCP_REGISTER_STACK) = stack;
+	asm volatile("" : : "r"(stack_reg));
+	register rcpEval_locals* locals_reg __asm__(RSH_RCP_REGISTER_LOCALS) = locals;
+	asm volatile("" : : "r"(locals_reg));
+	return call();
+}
+
+R_bcstack_t rcpEvalUnboxed(SEXP body, SEXP rho)
+{
+  if(!RSH_IS_JIT_PTR(body) || EXTPTR_PTR(body) == NULL)
+    error("Invalid body for rcpEval");
+
+  rcp_exec_ptrs* ptrs = (rcp_exec_ptrs*)RSH_JIT_PTR(body);
+
+  /* check if we have enough free space on the stack */
+  if (R_BCNodeStackTop + ptrs->max_stack_size > R_BCNodeStackEnd)
+    nodeStackOverflow();
+
+  /* save current globals */
+  struct bcEval_globals globals;
+  save_bcEval_globals(&globals);
+
+  /* allocate memory for locals - use VLA */
+  struct rcpEval_locals *locals = alloca(sizeof(struct rcpEval_locals) + ptrs->bcells_size * sizeof(SEXP));
+  RCNTXT rcntxts[ptrs->rcntxts_size];
+
+  /* set up locals */
+  locals->rho = rho;
+  locals->rcntxts = rcntxts;
+  //memset(locals->rcntxts, 0, ptrs->rcntxts_size * sizeof(RCNTXT));
+  for (int i = 0; i < ptrs->bcells_size; i++)
+    locals->vcache[i] = R_NilValue;
+
+  /* Precallocate memory on the stack */
+  R_bcstack_t* stack_base = R_BCNodeStackTop;
+  for (int i = 0; i < ptrs->max_stack_size; i++) {
+    R_BCNodeStackTop->tag = INTSXP;
+    R_BCNodeStackTop->flags = 0;
+    R_BCNodeStackTop->u.ival = 123456789;
+    R_BCNodeStackTop++;
+  }
+
+  /* Set global variables same way as bcEval */
+  R_Srcref = R_InBCInterpreter;
+  R_BCIntActive = 1;
+  R_BCFrame = NULL;
+
+  /* run the actual copy-patched code */
+  R_bcstack_t res = rcpNativeCaller(stack_base, locals, ptrs->eval);
+
+  /* restore everything to previous state */
+  restore_bcEval_globals(&globals);
+
+  return res;
+}
+#define rshEvalUnboxed rcpEvalUnboxed
+#else
+R_bcstack_t bc2cEvalUnboxed(SEXP body, SEXP rho)
+{
+    if (!RSH_IS_JIT_PTR(body) || RSH_JIT_PTR(body) == NULL)
+      Rf_error("Invalid body for rshEval");
+    SEXP prot = EXTPTR_PROT(body);
+    if (TYPEOF(prot) != VECSXP || LENGTH(prot) < 1)
+      Rf_error("Invalid JIT pointer: missing constant pool");
+    SEXP c_cp = RSH_JIT_CONSTS(body);
+
+    // seems like unnecesary complicated casting, but otherwise C complains
+    // cf. https://stackoverflow.com/a/19487645
+    Rsh_closure fun;
+    *(void **)(&fun) = RSH_JIT_PTR(body);
+    return fun(rho, c_cp);
+}
+#define rshEvalUnboxed bc2cEvalUnboxed
+#endif /* RCP */
+
+SEXP rshEval(SEXP body, SEXP rho)
+{
+  R_bcstack_t res = rshEvalUnboxed(body, rho);
+
+  switch (res.tag) {
+  case 0:
+    return res.u.sxpval;
+  case REALSXP:
+	return ScalarReal(res.u.dval);
+  case INTSXP:
+	return ScalarInteger(res.u.ival);
+  case LGLSXP:
+	return ScalarLogical(res.u.ival);
+  case RSH_ISQSXP:
+  {
+     Rsh_isqinfo_t isqinfo = res.u.isqval;
+	 return seq_int(isqinfo.n1, isqinfo.n2);
+  }
+  default:
+	__builtin_unreachable();
+  }
+}
+
 static SEXP bcEval_loop(struct bcEval_locals *);
 
 SEXP bcEval(SEXP body, SEXP rho)
@@ -7541,7 +7655,7 @@ SEXP bcEval(SEXP body, SEXP rho)
   struct bcEval_locals locals = bcode_setup_locals(body, rho);
   SEXP value = bcEval_loop(&locals);
   restore_bcEval_globals(&globals);
-  return value;  
+  return value;
 }
 
 static SEXP bcEval_loop(struct bcEval_locals *ploc)
@@ -8806,7 +8920,7 @@ static int findOp(void *addr)
     return 0; /* not reached */
 }
 
-attribute_hidden SEXP R_bcDecode(SEXP code) {
+SEXP R_bcDecode(SEXP code) {
     int n, i, j, *ipc;
     BCODE *pc;
     SEXP bytes;

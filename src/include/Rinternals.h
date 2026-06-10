@@ -210,12 +210,13 @@ typedef struct SEXPREC *SEXP;
 // BEGIN RSH CHANGES
 // - copied from Defn.h
 // ====================================================================
-
-typedef SEXP (*Rsh_closure)(SEXP, SEXP);
-
 LibExtern SEXP Rsh_ClosureBodyTag;
 
-#define RSH_IS_CLOSURE_BODY(e) (R_ExternalPtrTag((e)) == Rsh_ClosureBodyTag)
+#define RSH_IS_JIT_PTR(e) (TYPEOF(e) == EXTPTRSXP && EXTPTR_TAG(e) == Rsh_ClosureBodyTag)
+#define RSH_IS_CLOSURE(clo) (TYPEOF(clo) == CLOSXP && RSH_IS_CLOSURE_BODY(BODY(clo))
+#define RSH_IS_CLOSURE_BODY(e) RSH_IS_JIT_PTR(e)
+#define RSH_JIT_CONSTS(e) (VECTOR_ELT(EXTPTR_PROT(e), 0))
+#define RSH_JIT_PTR(e) (EXTPTR_PTR(e))
 
 // ======================= USE_RINTERNALS section
 #ifdef USE_RINTERNALS
@@ -1989,6 +1990,12 @@ int (BNDCELL_TAG)(SEXP e);
 
 int Rf_asLogical2(SEXP x, int checking, SEXP call);
 
+void R_CleanupEnvir(SEXP rho, SEXP val);
+void unpromiseArgs(SEXP pargs);
+void handle_eval_depth_overflow(void);
+extern int R_EvalDepth;
+extern int R_Expressions;
+
 /* The byte code engine uses a typed stack. The typed stack's entries
    consist of a tag and a union. An entry can represent a standard
    SEXP value (tag = 0) or an unboxed scalar value.  For now real,
@@ -2006,6 +2013,13 @@ int Rf_asLogical2(SEXP x, int checking, SEXP call);
    Allocating memory on the stack is also supported; this is currently
    used for jump buffers.
 */
+
+# define RSH_ISQSXP 12
+typedef struct {
+    int n2;
+    int n1;
+} Rsh_isqinfo_t;
+
 typedef struct {
     int tag;
     int flags;
@@ -2013,6 +2027,7 @@ typedef struct {
 	int ival;
 	double dval;
 	SEXP sxpval;
+	Rsh_isqinfo_t isqval;
     } u;
 } R_bcstack_t;
 # define PARTIALSXP_MASK (~255)
@@ -2087,6 +2102,90 @@ enum {
     CTXT_BUILTIN  = 64, /* used in profiling */
     CTXT_UNWIND   = 128
 };
+
+SEXP rshEval(SEXP body, SEXP rho);
+
+#ifdef RCP
+typedef R_bcstack_t (*Rsh_closure)(void);
+R_bcstack_t rcpEvalUnboxed(SEXP body, SEXP rho);
+#define rshEvalUnboxed rcpEvalUnboxed
+#else
+typedef R_bcstack_t (*Rsh_closure)(SEXP, SEXP);
+R_bcstack_t bc2cEvalUnboxed(SEXP body, SEXP rho);
+#define rshEvalUnboxed bc2cEvalUnboxed
+#endif
+
+#ifdef RCP
+// ====================================================================
+// RCP (copy-and-patch)
+// ====================================================================
+
+typedef struct rcp_sharedmem_ptrs
+{
+    void* memory_shared_near;
+    void* memory_shared_low;
+    size_t memory_shared_size;
+    void* memory_functions_executable;
+    size_t memory_functions_executable_size;
+} rcp_sharedmem_ptrs;
+
+/* rho and the rcntxts pointer are initialised once by rcpEvalUnboxed() in
+   eval.c and only read afterwards by the JIT'd stencil code. Mark them const
+   in the stencil translation unit (which defines COMPILING_STENCILS) so the
+   copy-and-patch code treats them as immutable; leave them writable everywhere
+   else so eval.c can assign them during setup. const is only a qualifier, so
+   the struct layout is identical across translation units. */
+#ifdef COMPILING_STENCILS
+# define RCP_LOCALS_RO const
+#else
+# define RCP_LOCALS_RO
+#endif
+
+typedef struct rcpEval_locals {
+    RCP_LOCALS_RO SEXP rho;
+    RCNTXT *RCP_LOCALS_RO rcntxts;
+    SEXP vcache[];
+} rcpEval_locals;
+
+#undef RCP_LOCALS_RO
+
+/* RCP private calling convention: stack and locals are passed in these
+   callee-saved x86-64 GPRs (under the standard SysV ABI), so runtime
+   helpers called from JIT code preserve them across calls. The JIT chain
+   itself uses no_callee_saved_registers, so the entry trampoline saves
+   them on behalf of the surrounding C code. */
+#define RSH_RCP_REGISTER_STACK  "rbx"
+#define RSH_RCP_REGISTER_LOCALS "r14"
+
+/* Forward declaration for GDB JIT support */
+struct jit_code_entry;
+
+typedef struct rcp_exec_ptrs
+{
+    // Executable code -- stack and locals are passed in the pinned registers
+    // above, not as ABI arguments.
+     __attribute__((no_callee_saved_registers)) R_bcstack_t (*eval)(void);
+
+    // Sizes of required runtime structures
+    int bcells_size;
+    int max_stack_size;
+    int rcntxts_size;
+
+    // Memory management
+    void* memory_private;
+    size_t memory_private_size;
+
+    // GDB JIT debug info (NULL if not registered)
+    struct jit_code_entry *jit_entry;
+
+    // .eh_frame registered with __register_frame (or NULL)
+    void *eh_frame_data;
+} rcp_exec_ptrs;
+
+
+void R_RcpSharedFree(SEXP);
+void R_RcpFree(SEXP);
+#endif /* RCP */
 
 // ====================================================================
 // END RSH CHANGES

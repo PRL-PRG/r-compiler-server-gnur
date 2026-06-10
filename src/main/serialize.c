@@ -1802,17 +1802,17 @@ static SEXP ReadItem_Iterative(int flags, SEXP ref_table, R_inpstream_t stream)
     /* Building dotted pair objects with recursion on the CDR will
        overflow the PROTECT stack for long lists. Instead we build
        pairlists in an iterative loop */
-    
+
     SEXPTYPE type = DECODE_TYPE(flags);
     SEXP s, sfirst = NULL, slast = NULL;
-    
+
     /* An assertion here guarantees that we go through the loop at
        least once. This make for cleaner exit code and avoids a
        potential infinite loop: ReadItem_Recursive <->
        ReadIterm_iterative */
     R_assert(type == LISTSXP || type == LANGSXP || type == CLOSXP ||
 	     type == PROMSXP || type == DOTSXP);
-    
+
     while (type == LISTSXP || type == LANGSXP || type == CLOSXP ||
 	   type == PROMSXP || type == DOTSXP) {
 	int levs, objf, hasattr, hastag;
@@ -1863,6 +1863,31 @@ static SEXP ReadItem_Iterative(int flags, SEXP ref_table, R_inpstream_t stream)
     PROTECT(s = ReadItem_Recursive(flags, ref_table, stream));
     R_ReadItemDepth--;
     SETCDR(slast, s);
+
+    /* If a CLOSXP body is a deserialized JIT-compiled EXTPTRSXP
+       (native pointer lost during serialization), replace it with
+       the original AST expression from the constant pool so the
+       closure can be interpreted normally. */
+    if (TYPEOF(sfirst) == CLOSXP) {
+	SEXP body = CDR(sfirst);
+	if (TYPEOF(body) == EXTPTRSXP &&
+	    EXTPTR_TAG(body) == Rsh_ClosureBodyTag &&
+	    EXTPTR_PTR(body) == NULL) {
+	    SEXP prot = EXTPTR_PROT(body);
+	    if (TYPEOF(prot) == VECSXP && LENGTH(prot) > 0) {
+		SEXP consts = VECTOR_ELT(prot, 0);
+		if (TYPEOF(consts) == VECSXP && LENGTH(consts) > 0) {
+		    SEXP expr = VECTOR_ELT(consts, 0);
+		    SETCDR(sfirst, expr);
+		} else {
+		    error("cannot restore deserialized JIT-compiled closure: constant pool has no AST expression");
+		}
+	    } else {
+		error("cannot restore deserialized JIT-compiled closure: missing or invalid constant pool");
+	    }
+	}
+    }
+
     UNPROTECT(2); /* s, sfirst */
     return sfirst;
 }

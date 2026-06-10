@@ -76,6 +76,10 @@
 # include "valgrind/memcheck.h"
 #endif
 
+#ifdef RCP
+#include <sys/mman.h>
+#endif
+
 /* For speed in cases when the argument is known to not be an ALTREP list. */
 #define VECTOR_ELT_0(x,i)        ((SEXP *) STDVEC_DATAPTR(x))[i]
 #define SET_VECTOR_ELT_0(x,i, v) (((SEXP *) STDVEC_DATAPTR(x))[i] = (v))
@@ -116,7 +120,11 @@ static void gc_error(const char *msg)
 }
 
 /* These are used in profiling to separate out time in GC */
-attribute_hidden int R_gc_running(void) { return R_in_gc; }
+attribute_hidden int
+#if __GNUC__ >= 3
+__attribute__ ((__pure__))
+#endif
+R_gc_running(void) { return R_in_gc; }
 
 #ifdef TESTING_WRITE_BARRIER
 # define PROTECTCHECK
@@ -432,7 +440,7 @@ attribute_hidden Rboolean R_SetMaxVSize(R_size_t size)
 	    R_MaxVSize = size;
 	    return TRUE;
 	}
-    } else 
+    } else
 	if (size / vsfac >= R_VSize) {
 	    R_MaxVSize = (size + 1) / vsfac;
 	    return TRUE;
@@ -490,7 +498,7 @@ attribute_hidden SEXP do_maxNSize(SEXP call, SEXP op, SEXP args, SEXP rho)
 	if (newval == R_PosInf)
 	    R_MaxNSize = R_SIZE_T_MAX;
 	else {
-	    if (newval >= (double) R_SIZE_T_MAX) 
+	    if (newval >= (double) R_SIZE_T_MAX)
 		R_MaxNSize = R_SIZE_T_MAX;
 	    else if (!R_SetMaxNSize((R_size_t) newval))
 		warning(_("a limit lower than current usage, so ignored"));
@@ -2307,7 +2315,11 @@ attribute_hidden void InitMemory(void)
    allocates off the heap as RAWSXP/REALSXP and maintains the stack of
    allocations through the ATTRIB pointer.  The stack pointer R_VStack
    is traced by the collector. */
-void *vmaxget(void)
+void*
+#if __GNUC__ >= 3
+__attribute__ ((__pure__))
+#endif
+vmaxget(void)
 {
     return (void *) R_VStack;
 }
@@ -4947,6 +4959,57 @@ attribute_hidden void R_FreeStringBufferL(R_StringBuffer *buf)
 	buf->data = NULL;
     }
 }
+
+#ifdef RCP
+void R_RcpSharedFree(SEXP ptr)
+{
+    rcp_sharedmem_ptrs* ptrs = R_ExternalPtrAddr(ptr);
+
+    if(ptrs)
+    {
+    /* unmap shared memory */
+    if (ptrs->memory_shared_near)
+    {
+        munmap(ptrs->memory_shared_near, ptrs->memory_shared_size);
+        ptrs->memory_shared_near = NULL;
+    }
+    if (ptrs->memory_shared_low)
+    {
+        munmap(ptrs->memory_shared_low, ptrs->memory_shared_size);
+        ptrs->memory_shared_low = NULL;
+    }
+    ptrs->memory_shared_size = 0;
+    if (ptrs->memory_functions_executable)
+    {
+        munmap(ptrs->memory_functions_executable, ptrs->memory_functions_executable_size);
+        ptrs->memory_functions_executable = NULL;
+    }
+    ptrs->memory_functions_executable_size = 0;
+
+    /* free the structure itself */
+    Free(ptrs);
+    EXTPTR_PTR(ptr) = NULL;
+    }
+}
+
+void R_RcpFree(SEXP ptr)
+{
+    if(!RSH_IS_CLOSURE_BODY(ptr))
+	error("Attempted to free a non-rcp pointer");
+
+    rcp_exec_ptrs* ptrs = (rcp_exec_ptrs*)EXTPTR_PTR(ptr);
+    if(ptrs)
+    {
+	/* unmap private memory */
+	munmap(ptrs->memory_private, ptrs->memory_private_size);
+
+	/* free the structure itself */
+	Free(ptrs);
+	EXTPTR_PTR(ptr) = NULL;
+    }
+}
+#endif /* RCP */
+
 
 /* ======== This needs direct access to gp field for efficiency ======== */
 
