@@ -5013,7 +5013,7 @@ void R_RcpSharedFree(SEXP ptr)
 void R_RcpFree(SEXP ptr)
 {
     if(!RSH_IS_CLOSURE_BODY(ptr))
-		error("Attemted to free a non-rcp pointer");
+	error("Attempted to free a non-rcp pointer");
 
 	rcp_exec_ptrs* ptrs = (rcp_exec_ptrs*)EXTPTR_PTR(ptr);
     if(ptrs)
