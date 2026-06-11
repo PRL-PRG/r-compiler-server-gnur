@@ -111,7 +111,7 @@ attribute_hidden SEXP do_delayed(SEXP call, SEXP op, SEXP args, SEXP rho)
 	if (value_sym == NULL) value_sym = install("value");
 	SEXP valprom = R_findVarInFrame(rho, value_sym);
 	if (TYPEOF(valprom) == PROMSXP && !PROMISE_IS_EVALUATED(valprom)
-	    && RSH_IS_JIT_PTR(PRCODE(valprom)))
+	    && RSH_IS_CLOSURE_BODY(PRCODE(valprom)))
 	    expr = PRCODE(valprom);
     }
 
