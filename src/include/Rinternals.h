@@ -212,9 +212,8 @@ typedef struct SEXPREC *SEXP;
 // ====================================================================
 LibExtern SEXP Rsh_ClosureBodyTag;
 
-#define RSH_IS_JIT_PTR(e) (TYPEOF(e) == EXTPTRSXP && EXTPTR_TAG(e) == Rsh_ClosureBodyTag)
+#define RSH_IS_CLOSURE_BODY(e) (TYPEOF(e) == EXTPTRSXP && EXTPTR_TAG(e) == Rsh_ClosureBodyTag)
 #define RSH_IS_CLOSURE(clo) (TYPEOF(clo) == CLOSXP && RSH_IS_CLOSURE_BODY(BODY(clo))
-#define RSH_IS_CLOSURE_BODY(e) RSH_IS_JIT_PTR(e)
 #define RSH_JIT_CONSTS(e) (VECTOR_ELT(EXTPTR_PROT(e), 0))
 #define RSH_JIT_PTR(e) (EXTPTR_PTR(e))
 

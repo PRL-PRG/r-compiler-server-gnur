@@ -1604,7 +1604,7 @@ static R_INLINE Rboolean R_CheckJIT(SEXP fun)
 
     SEXP body = BODY(fun);
 
-    if (R_jit_enabled > 0 && (TYPEOF(body) != EXTPTRSXP || !RSH_IS_CLOSURE_BODY(body)) && TYPEOF(body) != BCODESXP &&
+    if (R_jit_enabled > 0 && !RSH_IS_CLOSURE_BODY(body) && TYPEOF(body) != BCODESXP &&
 	! R_disable_bytecode && ! NOJIT(fun)) {
 
 	if (MAYBEJIT(fun)) {
@@ -1762,7 +1762,8 @@ static R_INLINE SEXP get_jit_cache_entry(R_exprhash_t hash)
     int hashidx = hash % JIT_CACHE_SIZE;
     if (JIT_cache_hashes[hashidx] == hash) {
 	SEXP entry = VECTOR_ELT(JIT_cache, hashidx);
-	if (TYPEOF(jit_cache_code(entry)) == BCODESXP)
+	SEXP cache_code = jit_cache_code(entry);
+	if (TYPEOF(cache_code) == BCODESXP || RSH_IS_CLOSURE_BODY(cache_code))
 	    return entry;
 	else
 	    /* function has been de-compiled; clear the cache entry */
@@ -1835,11 +1836,6 @@ static R_INLINE Rboolean jit_srcref_match(SEXP cmpsrcref, SEXP srcref)
     return R_compute_identical(cmpsrcref, srcref, 0);
 }
 
-Rboolean Rsh_is_closure(SEXP clo) {
-  return TYPEOF(clo) == CLOSXP && TYPEOF(BODY(clo)) == EXTPTRSXP && RSH_IS_CLOSURE_BODY(BODY(clo));
-}
-
-
 attribute_hidden SEXP R_cmpfun1(SEXP fun)
 {
     int old_visible = R_Visible;
@@ -1851,7 +1847,7 @@ attribute_hidden SEXP R_cmpfun1(SEXP fun)
     PROTECT(fcall = lang3(R_TripleColonSymbol, packsym, funsym));
     PROTECT(call = lang2(fcall, fun));
     PROTECT(val = eval(call, R_GlobalEnv));
-    if (!RSH_IS_CLOSURE(val) && TYPEOF(BODY(val)) != BCODESXP))
+    if (!RSH_IS_CLOSURE_BODY(BODY(val)) && TYPEOF(BODY(val)) != BCODESXP)
 	/* Compilation may have failed because R allocator could not malloc
 	   memory to extend the R heap, so we run GC to release some pages.
 	   This problem has been observed while byte-compiling packages on
@@ -1917,7 +1913,7 @@ static void R_cmpfun(SEXP fun)
 
     SEXP val = R_cmpfun1(fun);
 
-    if (!RSH_IS_CLOSURE(val) && TYPEOF(BODY(val)) != BCODESXP))
+    if (!RSH_IS_CLOSURE_BODY(BODY(val)) && TYPEOF(BODY(val)) != BCODESXP)
 	SET_NOJIT(fun);
     else {
 	if (jit_strategy != STRATEGY_NO_CACHE)
@@ -1961,6 +1957,10 @@ static Rboolean R_compileAndExecute(SEXP call, SEXP rho)
     if (TYPEOF(code) == BCODESXP) {
 	bcEval(code, rho);
 	ans = TRUE;
+    }
+    else if (RSH_IS_CLOSURE_BODY(code)) {
+    rshEval(code, rho);
+    ans = TRUE;
     }
 
     UNPROTECT(3);
@@ -2384,7 +2384,7 @@ static R_INLINE SEXP R_execClosure(SEXP call, SEXP newrho, SEXP sysparent,
 	SET_RDEBUG(newrho, 1);
 	cntxt.browserfinish = 0; /* Don't want to inherit the "f" */
 	/* switch to interpreted version when debugging compiled code */
-	if (TYPEOF(body) == BCODESXP)
+	if (TYPEOF(body) == BCODESXP || RSH_IS_CLOSURE_BODY(body))
 	    body = bytecodeExpr(body);
 	Rprintf("debugging in: ");
 	PrintCall(call, rho);
@@ -5579,7 +5579,7 @@ static SEXP bytecodeExpr(SEXP e)
 	    return VECTOR_ELT(BCODE_CONSTS(e), 0);
 	else return R_NilValue;
     }
-	else if(RSH_IS_JIT_PTR(e)) {
+	else if(RSH_IS_CLOSURE_BODY(e)) {
 	SEXP consts = RSH_JIT_CONSTS(e);
 	return VECTOR_ELT(consts, 0);
 	}
@@ -7547,8 +7547,8 @@ static __attribute__((noinline)) R_bcstack_t rcpNativeCaller(R_bcstack_t* stack,
 
 R_bcstack_t rcpEvalUnboxed(SEXP body, SEXP rho)
 {
-  if(!RSH_IS_JIT_PTR(body) || EXTPTR_PTR(body) == NULL)
-    error("Invalid body for rcpEval");
+  if(!RSH_IS_CLOSURE_BODY(body) || EXTPTR_PTR(body) == NULL)
+    error("Invalid body for rshEval");
 
   rcp_exec_ptrs* ptrs = (rcp_exec_ptrs*)RSH_JIT_PTR(body);
 
