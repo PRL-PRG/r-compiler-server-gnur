@@ -378,7 +378,7 @@ static RCNTXT * findProfContext(RCNTXT *cptr)
     /* If we're in a frame called by `eval()`, find the evaluation
        environment higher up the stack, if any. */
     if (parent && parent->callfun == INTERNAL(R_EvalSymbol))
-	parent = R_findExecContext(parent->nextcontext, cptr->sysparent);
+	parent = R_findExecContext(parent->nextcontext, Rsh_sysparent(cptr));
 
     if (parent)
 	return parent;
@@ -4032,7 +4032,7 @@ attribute_hidden SEXP do_recall(SEXP call, SEXP op, SEXP args, SEXP rho)
 	args = cptr->promargs;
     }
     /* get the env recall was called from */
-    s = R_GlobalContext->sysparent;
+    s = Rsh_sysparent(R_GlobalContext);
     while (cptr != NULL) {
 	if (cptr->callflag == CTXT_RETURN && cptr->cloenv == s)
 	    break;
@@ -4048,12 +4048,12 @@ attribute_hidden SEXP do_recall(SEXP call, SEXP op, SEXP args, SEXP rho)
     if (cptr->callfun != R_NilValue)
 	PROTECT(s = cptr->callfun);
     else if( TYPEOF(CAR(cptr->call)) == SYMSXP)
-	PROTECT(s = findFun(CAR(cptr->call), cptr->sysparent));
+	PROTECT(s = findFun(CAR(cptr->call), Rsh_sysparent(cptr)));
     else
-	PROTECT(s = eval(CAR(cptr->call), cptr->sysparent));
+	PROTECT(s = eval(CAR(cptr->call), Rsh_sysparent(cptr)));
     if (TYPEOF(s) != CLOSXP)
 	error(_("'Recall' called from outside a closure"));
-    ans = applyClosure(cptr->call, s, args, cptr->sysparent, R_NilValue, TRUE);
+    ans = applyClosure(cptr->call, s, args, Rsh_sysparent(cptr), R_NilValue, TRUE);
     UNPROTECT(1);
     return ans;
 }

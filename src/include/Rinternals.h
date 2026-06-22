@@ -217,6 +217,8 @@ typedef struct SEXPREC *SEXP;
 typedef SEXP (*Rsh_code)(SEXP, SEXP);
 
 LibExtern SEXP Rsh_CodeTag;
+LibExtern SEXP Rsh_ReflectivelyAccessed;
+LibExtern SEXP Rsh_ElidedEnv;
 
 #define RSH_IS_CLOSURE_BODY(e) (TYPEOF(e) == EXTPTRSXP && EXTPTR_TAG(e) == Rsh_ClosureBodyTag)
 #define RSH_IS_CLOSURE(clo) (TYPEOF(clo) == CLOSXP && RSH_IS_CLOSURE_BODY(BODY(clo))
@@ -2210,6 +2212,7 @@ typedef struct rcp_exec_ptrs
 void R_RcpSharedFree(SEXP);
 void R_RcpFree(SEXP);
 #endif /* RCP */
+SEXP Rsh_sysparent(RCNTXT *cntxt);
 
 // ====================================================================
 // END RSH CHANGES

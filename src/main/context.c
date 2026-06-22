@@ -431,7 +431,7 @@ attribute_hidden int R_sysparent(int n, RCNTXT *cptr)
     /* make sure we're looking at a return context */
     while (cptr->nextcontext != NULL && !(cptr->callflag & CTXT_FUNCTION) )
 	cptr = cptr->nextcontext;
-    s = cptr->sysparent;
+    s = Rsh_sysparent(cptr);
     if(s == R_GlobalEnv)
 	return 0;
     j = 0;
@@ -662,7 +662,7 @@ attribute_hidden SEXP do_sys(SEXP call, SEXP op, SEXP args, SEXP rho)
     checkArity(op, args);
 
     /* first find the context that sys.xxx needs to be evaluated in */
-    SEXP t = R_GlobalContext->sysparent;
+    SEXP t = Rsh_sysparent(R_GlobalContext);
     RCNTXT *cptr = getLexicalContext(t);
 
     if (length(args) == 1) n = asInteger(CAR(args));
@@ -740,7 +740,7 @@ attribute_hidden SEXP do_parentframe(SEXP call, SEXP op, SEXP args, SEXP rho)
     RCNTXT *cptr = R_findParentContext(R_GlobalContext, n);
 
     if (cptr)
-	return cptr->sysparent;
+	return Rsh_sysparent(cptr);
     else
 	return R_GlobalEnv;
 }
@@ -766,7 +766,7 @@ RCNTXT *R_findExecContext(RCNTXT *cptr, SEXP envir)
 attribute_hidden
 RCNTXT *R_findParentContext(RCNTXT *cptr, int n)
 {
-    while ((cptr = R_findExecContext(cptr, cptr->sysparent)) != NULL) {
+    while ((cptr = R_findExecContext(cptr, Rsh_sysparent(cptr))) != NULL) {
 	if (n == 1)
 	    return cptr;
 	n--;
@@ -822,7 +822,7 @@ Rboolean R_ToplevelExec(void (*fun)(void *), void *data)
 
 /* Return the current environment. */
 SEXP R_GetCurrentEnv(void) {
-    return R_GlobalContext->sysparent;
+    return Rsh_sysparent(R_GlobalContext);
 }
 
 
