@@ -296,7 +296,7 @@ attribute_hidden SEXP do_envir(SEXP call, SEXP op, SEXP args, SEXP rho)
     if (TYPEOF(CAR(args)) == CLOSXP)
 	return CLOENV(CAR(args));
     else if (CAR(args) == R_NilValue)
-	return R_GlobalContext->sysparent;
+	return Rsh_sysparent(R_GlobalContext);
     else return getAttrib(CAR(args), R_DotEnvSymbol);
 }
 

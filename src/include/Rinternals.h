@@ -214,6 +214,8 @@ typedef struct SEXPREC *SEXP;
 typedef SEXP (*Rsh_code)(SEXP, SEXP);
 
 LibExtern SEXP Rsh_CodeTag;
+LibExtern SEXP Rsh_ReflectivelyAccessed;
+LibExtern SEXP Rsh_ElidedEnv;
 
 #define IS_RSH_CODE(e) (R_ExternalPtrTag((e)) == Rsh_CodeTag)
 
@@ -2089,6 +2091,8 @@ enum {
     CTXT_BUILTIN  = 64, /* used in profiling */
     CTXT_UNWIND   = 128
 };
+
+SEXP Rsh_sysparent(RCNTXT *cntxt);
 
 // ====================================================================
 // END RSH CHANGES

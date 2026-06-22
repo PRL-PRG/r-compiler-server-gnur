@@ -1247,6 +1247,7 @@ void attribute_hidden InitNames(void)
     R_init_altrep();
 
     Rsh_CodeTag = install("Rsh_CodeTag");
+    Rsh_ReflectivelyAccessed = install("Rsh_ReflectivelyAccessed");
 }
 
 
