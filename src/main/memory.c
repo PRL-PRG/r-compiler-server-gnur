@@ -1769,6 +1769,7 @@ static int RunGenCollect(R_size_t size_needed)
     FORWARD_NODE(R_GlobalEnv);	           /* Global environment */
     FORWARD_NODE(R_BaseEnv);
     FORWARD_NODE(R_EmptyEnv);
+    FORWARD_NODE(Rsh_ElidedEnv);           /* RSH elided-env sentinel (NULL until InitElidedEnv) */
     FORWARD_NODE(R_Warnings);	           /* Warnings, if any */
     FORWARD_NODE(R_ReturnedValue);
 
