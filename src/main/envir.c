@@ -665,9 +665,15 @@ static SEXP R_NamespaceSymbol;
 
 attribute_hidden void InitBaseEnv(void)
 {
-    Rsh_ElidedEnv = NULL;
     R_EmptyEnv = NewEnvironment(R_NilValue, R_NilValue, R_NilValue);
     R_BaseEnv = NewEnvironment(R_NilValue, R_NilValue, R_EmptyEnv);
+}
+
+/* Must be called after InitNames(), which installs Rsh_ReflectivelyAccessed
+   and initializes the symbol table that defineVar() relies on. */
+attribute_hidden void InitElidedEnv(void)
+{
+    Rsh_ElidedEnv = NULL;
     SEXP elidedEnv = NewEnvironment(R_NilValue, R_NilValue, R_NilValue);
     defineVar(Rsh_ReflectivelyAccessed, R_TrueValue, elidedEnv);
     // After it's set, `defineVar` etc. will error
@@ -4642,10 +4648,14 @@ attribute_hidden void findFunctionForBody(SEXP body) {
 }
 
 void recordReflection(SEXP env) {
+	if (env == Rsh_ElidedEnv) {
+		Rf_error("attempted reflection in environment-elided closure");
+	}
     SEXP refectivelyAccessed = R_findVarInFrame(env, Rsh_ReflectivelyAccessed);
     if (refectivelyAccessed == R_LogicalNAValue) {
         Rf_error("attempted reflection in reflection-elided closure");
-    } else if (refectivelyAccessed != R_TrueValue) {
+    }
+	if (refectivelyAccessed != R_TrueValue) {
         defineVar(Rsh_ReflectivelyAccessed, R_TrueValue, env);
     }
 }

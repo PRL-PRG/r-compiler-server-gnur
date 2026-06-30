@@ -1343,6 +1343,7 @@ void InitConnections(void);
 void InitEd(void);
 void InitFunctionHashing(void);
 void InitBaseEnv(void);
+void InitElidedEnv(void);  // Added by Rsh
 void InitGlobalEnv(void);
 Rboolean R_current_trace_state(void);
 Rboolean R_current_debug_state(void);
