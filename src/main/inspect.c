@@ -48,6 +48,8 @@ static void PrintEnvironment(SEXP x)
 	Rprintf("<base>");
     else if (x == R_EmptyEnv)
 	Rprintf("<R_EmptyEnv>");
+    else if (x == Rsh_ElidedEnv)
+	error("user managed to access elided environment (PrintEnvironment)");
     else if (R_IsPackageEnv(x))
 	Rprintf("<%s>",
 		translateChar(STRING_ELT(R_PackageEnvName(x), 0)));

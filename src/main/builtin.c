@@ -395,7 +395,7 @@ attribute_hidden SEXP do_parentenv(SEXP call, SEXP op, SEXP args, SEXP rho)
     if( !isEnvironment(arg)  &&
 	!isEnvironment((arg = simple_as_environment(arg))))
 	error( _("argument is not an environment"));
-    if( arg == R_EmptyEnv )
+    if( arg == R_EmptyEnv || arg == Rsh_ElidedEnv )
 	error(_("the empty environment has no parent"));
     return( ENCLOS(arg) );
 }
@@ -433,6 +433,8 @@ attribute_hidden SEXP do_parentenvgets(SEXP call, SEXP op, SEXP args, SEXP rho)
 	error(_("argument is not an environment"));
     if( env == R_EmptyEnv )
 	error(_("can not set parent of the empty environment"));
+    if( env == Rsh_ElidedEnv )
+	error(_("user managed to access elided environment (do_parentenvgets)"));
     if (R_EnvironmentIsLocked(env) && R_IsNamespaceEnv(env))
 	error(_("can not set the parent environment of a namespace"));
     if (R_EnvironmentIsLocked(env) && R_IsImportsEnv(env))
@@ -462,6 +464,7 @@ attribute_hidden SEXP do_envirName(SEXP call, SEXP op, SEXP args, SEXP rho)
 	if (env == R_GlobalEnv) ans = mkString("R_GlobalEnv");
 	else if (env == R_BaseEnv) ans = mkString("base");
 	else if (env == R_EmptyEnv) ans = mkString("R_EmptyEnv");
+	else if (env == Rsh_ElidedEnv) 	error("user managed to access elided environment (do_envirName)");
 	else if (R_IsPackageEnv(env))
 	    ans = ScalarString(STRING_ELT(R_PackageEnvName(env), 0));
 	else if (R_IsNamespaceEnv(env))

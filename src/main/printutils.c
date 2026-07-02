@@ -160,6 +160,8 @@ const char *EncodeEnvironment(SEXP x)
 	snprintf(ch, 1000, "<environment: base>");
     else if (x == R_EmptyEnv)
 	snprintf(ch, 1000, "<environment: R_EmptyEnv>");
+    else if (x == Rsh_ElidedEnv)
+	error("user managed to access elided environment (EncodeEnvironment)");
     else if (R_IsPackageEnv(x))
 	snprintf(ch, 1000, "<environment: %s>",
 		translateChar(STRING_ELT(R_PackageEnvName(x), 0)));
