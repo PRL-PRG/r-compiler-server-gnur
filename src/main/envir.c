@@ -1968,6 +1968,8 @@ static int RemoveVariable(SEXP name, int hashcode, SEXP env)
 	error(_("cannot remove variables from the base environment"));
     if (env == R_EmptyEnv)
 	error(_("cannot remove variables from the empty environment"));
+    if (env == Rsh_ElidedEnv)
+	error(_("cannot remove variables from the elided environment"));
     if (FRAME_IS_LOCKED(env))
 	error(_("cannot remove bindings from a locked environment"));
 
