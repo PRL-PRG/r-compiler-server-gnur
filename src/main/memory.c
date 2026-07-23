@@ -1276,7 +1276,7 @@ static void AgeNodeAndChildren(SEXP s, int gen)
     }
 }
 
-static void old_to_new(SEXP x, SEXP y)
+void old_to_new(SEXP x, SEXP y)
 {
 #ifdef EXPEL_OLD_TO_NEW
     AgeNodeAndChildren(y, NODE_GENERATION(x));
