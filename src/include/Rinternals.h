@@ -2166,6 +2166,16 @@ typedef struct rcpEval_locals {
 /* Forward declaration for GDB JIT support */
 struct jit_code_entry;
 
+/* One mmap'd region owned by a compiled body. The compiler collects every
+   region it maps (executable code, low-32 variant pool, ...) into a dynamically
+   grown array on rcp_exec_ptrs so R_RcpFree can munmap them all generically;
+   new region kinds can be added without changing this struct. */
+typedef struct rcp_mmap_region
+{
+    void* ptr;
+    size_t size;
+} rcp_mmap_region;
+
 typedef struct rcp_exec_ptrs
 {
     // Executable code -- stack and locals are passed in the pinned registers
@@ -2177,9 +2187,11 @@ typedef struct rcp_exec_ptrs
     int max_stack_size;
     int rcntxts_size;
 
-    // Memory management
-    void* memory_private;
-    size_t memory_private_size;
+    // Memory management: dynamically-grown list of mmap'd regions to munmap when
+    // the compiled body is freed (see rcp_mmap_region).
+    rcp_mmap_region* mmap_regions;
+    size_t mmap_regions_count;
+    size_t mmap_regions_capacity;
 
     // GDB JIT debug info (NULL if not registered)
     struct jit_code_entry *jit_entry;

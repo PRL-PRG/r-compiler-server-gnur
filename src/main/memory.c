@@ -5018,8 +5018,10 @@ void R_RcpFree(SEXP ptr)
 	rcp_exec_ptrs* ptrs = (rcp_exec_ptrs*)EXTPTR_PTR(ptr);
     if(ptrs)
     {
-	/* unmap private memory */
-        munmap(ptrs->memory_private, ptrs->memory_private_size);
+	/* unmap every private region (executable code, low-32 variant pool, ...) */
+	for (size_t i = 0; i < ptrs->mmap_regions_count; i++)
+	    munmap(ptrs->mmap_regions[i].ptr, ptrs->mmap_regions[i].size);
+	free(ptrs->mmap_regions);
         
 	/* free the structure itself */
 	R_Free(ptrs);
