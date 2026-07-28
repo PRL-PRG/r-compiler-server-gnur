@@ -217,6 +217,14 @@ LibExtern SEXP Rsh_ClosureBodyTag;
 #define RSH_JIT_CONSTS(e) (VECTOR_ELT(EXTPTR_PROT(e), 0))
 #define RSH_JIT_PTR(e) (EXTPTR_PTR(e))
 
+typedef SEXP (*Rsh_code)(SEXP, SEXP);
+
+LibExtern SEXP Rsh_CodeTag;
+LibExtern SEXP Rsh_ReflectivelyAccessed;
+LibExtern SEXP Rsh_ElidedEnv;
+
+#define IS_RSH_CODE(e) (TYPEOF(e) == EXTPTRSXP && EXTPTR_TAG((e)) == Rsh_CodeTag)
+
 // ======================= USE_RINTERNALS section
 #ifdef USE_RINTERNALS
 /* This is intended for use only within R itself.
@@ -1923,9 +1931,11 @@ SEXP Rf_applyClosure(SEXP, SEXP, SEXP, SEXP, SEXP, Rboolean);
 
 #define DispatchGroup Rf_DispatchGroup
 #define ddfindVar     Rf_ddfindVar
+#define ddfind        Rf_ddfind
 #define mkCLOSXP      Rf_mkCLOSXP
 
 SEXP ddfindVar(SEXP, SEXP);
+SEXP ddfind(int, SEXP);
 SEXP mkCLOSXP(SEXP, SEXP, SEXP);
 
 #define INCREMENT_LINKS(x) do {			\
@@ -2197,6 +2207,7 @@ typedef struct rcp_exec_ptrs
 void R_RcpSharedFree(SEXP);
 void R_RcpFree(SEXP);
 #endif /* RCP */
+SEXP Rsh_sysparent(RCNTXT *cntxt);
 
 // ====================================================================
 // END RSH CHANGES

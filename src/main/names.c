@@ -1246,7 +1246,8 @@ void attribute_hidden InitNames(void)
     R_initialize_bcode();
     R_init_altrep();
 
-    Rsh_ClosureBodyTag = install("Rsh_ClosureBodyTag");
+    Rsh_CodeTag = install("Rsh_CodeTag");
+    Rsh_ReflectivelyAccessed = install("Rsh_ReflectivelyAccessed");
 }
 
 

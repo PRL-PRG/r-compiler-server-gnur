@@ -108,6 +108,8 @@
 #define LOCK_FRAME(e) SET_ENVFLAGS(e, ENVFLAGS(e) | FRAME_LOCK_MASK)
 /*#define UNLOCK_FRAME(e) SET_ENVFLAGS(e, ENVFLAGS(e) & (~ FRAME_LOCK_MASK))*/
 
+static void recordReflection(SEXP);
+
 /* use the same bits (15 and 14) in symbols and bindings */
 static SEXP getActiveValue(SEXP);
 static R_INLINE SEXP BINDING_VALUE(SEXP b)
@@ -667,6 +669,17 @@ attribute_hidden void InitBaseEnv(void)
     R_BaseEnv = NewEnvironment(R_NilValue, R_NilValue, R_EmptyEnv);
 }
 
+/* Must be called after InitNames(), which installs Rsh_ReflectivelyAccessed
+   and initializes the symbol table that defineVar() relies on. */
+attribute_hidden void InitElidedEnv(void)
+{
+    Rsh_ElidedEnv = NULL;
+    SEXP elidedEnv = NewEnvironment(R_NilValue, R_NilValue, R_NilValue);
+    defineVar(Rsh_ReflectivelyAccessed, R_TrueValue, elidedEnv);
+    // After it's set, `defineVar` etc. will error
+    Rsh_ElidedEnv = elidedEnv;
+}
+
 attribute_hidden void InitGlobalEnv(void)
 {
     R_NamespaceSymbol = install(".__NAMESPACE__.");
@@ -883,7 +896,7 @@ SEXP findVarLocInFrame(SEXP rho, SEXP symbol, Rboolean *canCache)
     if (rho == R_BaseEnv || rho == R_BaseNamespace)
 	return (SYMVALUE(symbol) == R_UnboundValue) ? R_NilValue : symbol;
 
-    if (rho == R_EmptyEnv)
+    if (rho == R_EmptyEnv || rho == Rsh_ElidedEnv)
 	return R_NilValue;
 
     if(IS_USER_DATABASE(rho)) {
@@ -1001,7 +1014,7 @@ SEXP findVarInFrame3(SEXP rho, SEXP symbol, Rboolean doGet)
     if (rho == R_BaseNamespace || rho == R_BaseEnv)
 	return SYMBOL_BINDING_VALUE(symbol);
 
-    if (rho == R_EmptyEnv)
+    if (rho == R_EmptyEnv || rho == Rsh_ElidedEnv)
 	return R_UnboundValue;
 
     if(IS_USER_DATABASE(rho)) {
@@ -1055,7 +1068,7 @@ Rboolean R_existsVarInFrame(SEXP rho, SEXP symbol)
     if (rho == R_BaseNamespace || rho == R_BaseEnv)
 	return SYMBOL_HAS_BINDING(symbol);
 
-    if (rho == R_EmptyEnv)
+    if (rho == R_EmptyEnv || rho == Rsh_ElidedEnv)
 	return FALSE;
 
     if(IS_USER_DATABASE(rho)) {
@@ -1117,7 +1130,7 @@ void readS3VarsFromFrame(SEXP rho,
     SEXP *dotGenericCallEnv, SEXP *dotGenericDefEnv) {
 
     if (TYPEOF(rho) == NILSXP ||
-	rho == R_BaseNamespace || rho == R_BaseEnv || rho == R_EmptyEnv ||
+	rho == R_BaseNamespace || rho == R_BaseEnv || rho == R_EmptyEnv || rho == Rsh_ElidedEnv ||
 	IS_USER_DATABASE(rho) || HASHTAB(rho) != R_NilValue) goto slowpath;
 
     SEXP frame = FRAME(rho);
@@ -1628,6 +1641,8 @@ void defineVar(SEXP symbol, SEXP value, SEXP rho)
 
     if (rho == R_EmptyEnv)
 	error(_("cannot assign values in the empty environment"));
+    else if (rho == Rsh_ElidedEnv)
+	error(_("cannot assign values in an elided environment"));
 
     if(IS_USER_DATABASE(rho)) {
 	R_ObjectTable *table;
@@ -1756,7 +1771,7 @@ static SEXP setVarInFrame(SEXP rho, SEXP symbol, SEXP value)
 
     /* R_DirtyImage should only be set if assigning to R_GlobalEnv. */
     if (rho == R_GlobalEnv) R_DirtyImage = 1;
-    if (rho == R_EmptyEnv) return R_NilValue;
+    if (rho == R_EmptyEnv || rho == Rsh_ElidedEnv) return R_NilValue;
 
     if(IS_USER_DATABASE(rho)) {
 	/* FIXME: This does not behave as described */
@@ -1952,6 +1967,8 @@ static int RemoveVariable(SEXP name, int hashcode, SEXP env)
 	error(_("cannot remove variables from the base environment"));
     if (env == R_EmptyEnv)
 	error(_("cannot remove variables from the empty environment"));
+    if (env == Rsh_ElidedEnv)
+	error(_("cannot remove variables from the elided environment"));
     if (FRAME_IS_LOCKED(env))
 	error(_("cannot remove bindings from a locked environment"));
 
@@ -3236,7 +3253,7 @@ static SEXP pos2env(int pos, SEXP call)
 	if( !(cptr->callflag & CTXT_FUNCTION) )
 	    errorcall(call, _("no enclosing environment"));
 
-	env = cptr->sysparent;
+	env = Rsh_sysparent(cptr);
 	if (R_GlobalEnv != R_NilValue && env == R_NilValue)
 	    errorcall(call, _("invalid '%s' argument"), "pos");
     }
@@ -4626,4 +4643,23 @@ attribute_hidden void findFunctionForBody(SEXP body) {
 	    frame = CDR(frame);
 	}
     }
+}
+
+void recordReflection(SEXP env) {
+	if (env == Rsh_ElidedEnv) {
+		Rf_error("attempted reflection in environment-elided closure");
+	}
+	SEXP refectivelyAccessed = R_findVarInFrame(env, Rsh_ReflectivelyAccessed);
+    if (refectivelyAccessed == R_LogicalNAValue) {
+        Rf_error("attempted reflection in reflection-elided closure");
+    }
+	if (refectivelyAccessed != R_TrueValue) {
+        defineVar(Rsh_ReflectivelyAccessed, R_TrueValue, env);
+    }
+}
+
+SEXP Rsh_sysparent(RCNTXT *cntxt) {
+    SEXP sysparent = cntxt->sysparent;
+    recordReflection(sysparent);
+    return sysparent;
 }
