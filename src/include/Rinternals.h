@@ -213,6 +213,12 @@ typedef struct SEXPREC *SEXP;
 // BEGIN RSH CHANGES
 // - copied from Defn.h
 // ====================================================================
+LibExtern SEXP Rsh_ClosureBodyTag;
+
+#define RSH_IS_CLOSURE_BODY(e) (TYPEOF(e) == EXTPTRSXP && EXTPTR_TAG(e) == Rsh_ClosureBodyTag)
+#define RSH_IS_CLOSURE(clo) (TYPEOF(clo) == CLOSXP && RSH_IS_CLOSURE_BODY(BODY(clo))
+#define RSH_JIT_CONSTS(e) (VECTOR_ELT(EXTPTR_PROT(e), 0))
+#define RSH_JIT_PTR(e) (EXTPTR_PTR(e))
 
 typedef SEXP (*Rsh_code)(SEXP, SEXP);
 
@@ -220,11 +226,7 @@ LibExtern SEXP Rsh_CodeTag;
 LibExtern SEXP Rsh_ReflectivelyAccessed;
 LibExtern SEXP Rsh_ElidedEnv;
 
-#define RSH_IS_CLOSURE_BODY(e) (TYPEOF(e) == EXTPTRSXP && EXTPTR_TAG(e) == Rsh_ClosureBodyTag)
-#define RSH_IS_CLOSURE(clo) (TYPEOF(clo) == CLOSXP && RSH_IS_CLOSURE_BODY(BODY(clo))
-#define RSH_JIT_CONSTS(e) (VECTOR_ELT(EXTPTR_PROT(e), 0))
-#define RSH_JIT_PTR(e) (EXTPTR_PTR(e))
-#define IS_RSH_CODE(e) (R_ExternalPtrTag((e)) == Rsh_CodeTag)
+#define IS_RSH_CODE(e) (TYPEOF(e) == EXTPTRSXP && EXTPTR_TAG((e)) == Rsh_CodeTag)
 
 // ======================= USE_RINTERNALS section
 #ifdef USE_RINTERNALS

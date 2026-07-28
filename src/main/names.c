@@ -1248,6 +1248,10 @@ attribute_hidden void InitNames(void)
     R_initialize_bcode();
     R_init_altrep();
 
+    /* Distinct tags: bodies compiled by Rsh/RCP carry Rsh_ClosureBodyTag and
+       are run through rshEval, FIR code carries Rsh_CodeTag and is called
+       directly.  eval() dispatches on both, so both must be installed. */
+    Rsh_ClosureBodyTag = install("Rsh_ClosureBodyTag");
     Rsh_CodeTag = install("Rsh_CodeTag");
     Rsh_ReflectivelyAccessed = install("Rsh_ReflectivelyAccessed");
 }
