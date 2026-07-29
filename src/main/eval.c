@@ -7586,7 +7586,7 @@ R_bcstack_t rcpEvalUnboxed(SEXP body, SEXP rho)
 #else
 R_bcstack_t bc2cEvalUnboxed(SEXP body, SEXP rho)
 {
-    if (!RSH_IS_JIT_PTR(body) || RSH_JIT_PTR(body) == NULL)
+    if (!RSH_IS_CLOSURE_BODY(body) || RSH_JIT_PTR(body) == NULL)
       Rf_error("Invalid body for rshEval");
     SEXP prot = EXTPTR_PROT(body);
     if (TYPEOF(prot) != VECSXP || LENGTH(prot) < 1)
