@@ -2050,6 +2050,9 @@ typedef struct {
 # define IS_PARTIAL_SXP_TAG(x) ((x) & PARTIALSXP_MASK)
 # define RAWMEM_TAG 254
 # define CACHESZ_TAG 253
+/* Boxed stack entry to be ignored by stack protection. Must be > 255 so that
+   IS_PARTIAL_SXP_TAG holds and the GC still traces u.sxpval. */
+# define NLNKSXP 9996
 
 #ifdef IMMEDIATE_PROMISE_VALUES
 SEXP R_expand_promise_value(SEXP);

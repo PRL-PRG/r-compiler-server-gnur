@@ -1003,7 +1003,7 @@ void forcePromise(SEXP e)
  * functional style.
  */
 
-static R_bcstack_t *R_BCProtCommitted;
+R_bcstack_t *R_BCProtCommitted;
 
 static R_INLINE void INCLNK_stack(R_bcstack_t *top)
 {
@@ -4774,8 +4774,8 @@ static SEXP seq_int(int n1, int n2)
 #ifdef COMPACT_INTSEQ
 # define INTSEQSXP 9999
 #endif
-/* tag for boxed stack entries to be ignored by stack protection */
-#define NLNKSXP 9996
+/* NLNKSXP (tag for boxed stack entries to be ignored by stack protection) is
+   in Rinternals.h so the rsh/rcp JIT agrees with us on the value. */
 
 #define GETSTACK_FLAGS(n) (R_BCNodeStackTop[n].flags)
 #define SETSTACK_FLAGS(n, v) (R_BCNodeStackTop[n].flags = (v))
